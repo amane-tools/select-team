@@ -92,7 +92,8 @@
   .vbtn.up.on{background:var(--green-soft);color:var(--green);border-color:var(--green-line)}
   .vbtn.down.on{background:var(--red-soft);color:var(--red);border-color:#f2c9cc}
   .vbtn .vn{font-size:10px;opacity:.75}
-  .cmtbtn{font-size:11px;font-weight:600;padding:4px 11px;border-radius:100px;border:1px solid var(--line);background:var(--gray-soft);color:var(--ink-soft);cursor:pointer;margin-left:auto}
+  .fbright{margin-left:auto;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+  .cmtbtn{font-size:11px;font-weight:600;padding:4px 11px;border-radius:100px;border:1px solid var(--line);background:var(--gray-soft);color:var(--ink-soft);cursor:pointer}
   .cmtbtn:hover{background:#e6e9ef;border-color:var(--ink-faint)}
   .cmtbtn.has{background:var(--gray2);color:#fff;border-color:var(--gray2)}
   .cmtbox{width:100%;margin-top:8px}
@@ -355,11 +356,13 @@ function renderFbRow(el, kind, theme, angle, withDig){
   const mk = (cls,label,fn)=>{ const b=document.createElement('button'); b.className=cls; b.innerHTML=label; b.onclick=(e)=>{e.stopPropagation();fn();}; return b; };
   el.appendChild(mk('vbtn up'+(v.mine===1?' on':''), `👍<span class="vn">${v.up||''}</span>`, ()=>setVote(kind,theme,angle,1)));
   el.appendChild(mk('vbtn down'+(v.mine===-1?' on':''), `👎<span class="vn">${v.down||''}</span>`, ()=>setVote(kind,theme,angle,-1)));
-  el.appendChild(mk('cmtbtn','💬 気づき・改善', ()=>toggleCmtBox(el,kind,theme,angle)));
+  const right = document.createElement('span'); right.className = 'fbright';
+  right.appendChild(mk('cmtbtn','💬 気づき・改善', ()=>toggleCmtBox(el,kind,theme,angle)));
   if(el.dataset.dig === '1'){
     const d = document.createElement('span'); d.className = 'digbtn'; d.innerHTML = '深掘る <span class="da">→</span>';
-    el.appendChild(d);   // クリックはカード全体のonclickでopenAnglesが走る
+    right.appendChild(d);   // クリックはカード全体のonclickでopenAnglesが走る
   }
+  el.appendChild(right);
 }
 function refreshFbRows(){
   document.querySelectorAll('.fbrow[data-fk]').forEach(el=>{
