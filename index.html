@@ -441,9 +441,8 @@ function renderThemes(){
       card.innerHTML = `<div class="tt">${t.t}<span class="tb ${t.o}">${t.o==='shun'?'旬':'常時'}</span>${t.gt?'<span class="gtb">📈トレンド</span>':''}${t.pin?'<span class="pinb">★</span>':''}</div>
         <div class="tbot"><span class="tang">切り口 <b>${t.ang}</b></span></div>
         <div class="treason"><span class="rz">理由</span><span>${t.memo}</span></div>
-        <div class="fbrow"></div>
-        <div class="digrow"><span class="digbtn">深掘る <span class="da">→</span></span></div>`;
-      renderFbRow(card.querySelector('.fbrow'), 'theme', t.t, null);
+        <div class="fbrow"></div>`;
+      renderFbRow(card.querySelector('.fbrow'), 'theme', t.t, null, true);
       card.onclick = (e)=>{ if((e.target.closest('.fbrow')&&!e.target.closest('.digbtn'))||e.target.closest('.cmtbox'))return; openAngles(t,card,grid); };
       grid.appendChild(card);
     });
