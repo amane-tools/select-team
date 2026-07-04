@@ -81,6 +81,35 @@
   .cwho .ini{width:14px;height:14px;border-radius:50%;background:var(--blue);color:#fff;font-size:8px;display:inline-flex;align-items:center;justify-content:center;font-weight:700}
   .cwho.done{background:var(--green-soft);color:var(--green)} .cwho.done .ini{background:var(--green)}
 
+  /* ===== フィードバック(👍👎/コメント) ===== */
+  .fbrow{display:flex;align-items:center;gap:6px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);flex-wrap:wrap}
+  .vbtn{font-size:11px;font-weight:700;padding:3px 9px;border-radius:100px;border:1px solid var(--line);background:#fff;color:var(--ink-soft);cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:4px}
+  .vbtn:hover{border-color:var(--ink-faint)}
+  .vbtn.up.on{background:var(--green-soft);color:var(--green);border-color:var(--green-line)}
+  .vbtn.down.on{background:var(--red-soft);color:var(--red);border-color:#f2c9cc}
+  .vbtn .vn{font-size:10px;opacity:.75}
+  .cmtbtn{font-size:11px;font-weight:700;padding:4px 11px;border-radius:100px;border:1px solid #cfe0fb;background:var(--blue-soft);color:var(--blue-deep);cursor:pointer;margin-left:auto}
+  .cmtbtn:hover{background:#dfeafd}
+  .cmtbtn.has{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .cmtbox{width:100%;margin-top:8px}
+  .cmtbox textarea{width:100%;border:1px solid #cfe0fb;border-radius:9px;padding:9px 11px;font-size:12.5px;font-family:inherit;resize:vertical;min-height:56px;background:#fbfcff}
+  .cmtbox textarea:focus{outline:none;border-color:var(--blue)}
+  .cmtbox .cbar{display:flex;gap:6px;margin-top:6px;align-items:center}
+  .cmtbox .send{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:6px 15px;font-size:12px;font-weight:700;cursor:pointer}
+  .cmtbox .cancel{background:var(--gray-soft);color:var(--ink-soft);border:none;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer}
+  .cmtbox .cmthint{font-size:10.5px;color:var(--ink-faint);margin-left:auto}
+  .cmtlog{margin-top:7px;display:flex;flex-direction:column;gap:5px}
+  .cmtline{font-size:11.5px;color:var(--ink-soft);background:#fbfcfe;border:1px solid var(--line);border-left:2px solid var(--blue);border-radius:7px;padding:5px 9px}
+  .cmtline .cw{font-size:9.5px;font-weight:700;color:var(--blue-deep);margin-right:6px}
+  /* 学習ストリップ */
+  .learnstrip{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 13px;margin:2px 0 14px;box-shadow:var(--shadow)}
+  .learnstrip .lh{font-size:11.5px;font-weight:700;color:var(--ink-soft);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .lchips{display:flex;gap:6px;flex-wrap:wrap}
+  .lchip{font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;border:1px solid var(--line);background:#fbfcfe;color:var(--ink-soft);display:inline-flex;gap:6px;align-items:center}
+  .lchip .lt{font-size:8.5px;font-weight:700;padding:1px 6px;border-radius:4px}
+  .lt.ex{background:var(--red-soft);color:var(--red)} .lt.bo{background:var(--green-soft);color:var(--green)} .lt.rw{background:var(--purple-soft);color:var(--purple)}
+  .lt.kw{background:var(--teal-soft);color:var(--teal)} .lt.wa{background:var(--blue-soft);color:var(--blue-deep)} .lt.no{background:var(--gray-soft);color:var(--ink-soft)}
+
   /* ===== 切り口展開ビュー ===== */
   .tcard.chosen{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue),var(--shadow)}
   .angle-panel{grid-column:1/-1;background:linear-gradient(180deg,#fbfcfe,#fff);border:1px solid var(--blue);border-radius:var(--radius);padding:18px 20px;margin:4px 0 6px;box-shadow:var(--shadow);opacity:0;animation:rise .3s forwards}
@@ -198,6 +227,8 @@
     <span class="counter" id="counter"></span>
   </div>
 
+  <div id="learnStrip"></div>
+
   <div id="area"><div class="empty">読み込み中…</div></div>
 
   <!-- メンバー管理（管理者のみ） -->
@@ -227,6 +258,8 @@ let CATALOG = null;     // payload
 let CATS = {}, THEMES = [], ANGLE_DATA = {}, ASSIGN = [];
 let CATDATE = null;
 let CLAIMS = {};        // key -> {user_email,user_name,status}
+let VOTES = {};         // key -> {up,down,mine}
+let LEARNING = [];      // 直近の学習(透明性表示用)
 let filter = 'all', panelBusy = false;
 const CTL = {nayami:"悩み",scene:"シーン",buy:"購買軸",attr:"属性"};
 
@@ -272,8 +305,8 @@ async function loadCatalog(){
   CATALOG = row.payload; CATDATE = row.date;
   CATS = CATALOG.CATS || {}; THEMES = CATALOG.THEMES || []; ANGLE_DATA = CATALOG.ANGLE_DATA || {}; ASSIGN = CATALOG.ASSIGN || [];
   $('dateLbl').innerHTML = `今日のカタログ <b>${row.date}</b>`;
-  await loadClaims();
-  renderStats(); renderFilter(); renderThemes();
+  await loadClaims(); await loadVotes(); await loadLearning();
+  renderStats(); renderLearning(); renderFilter(); renderThemes();
 }
 async function loadClaims(){
   CLAIMS = {};
@@ -281,6 +314,84 @@ async function loadClaims(){
   (data||[]).forEach(c=>{ CLAIMS[claimKey(c.kind,c.theme,c.angle_title)] = c; });
 }
 function claimKey(kind,theme,angle){ return kind+'::'+theme+'::'+(angle||''); }
+
+/* ---------- フィードバック(👍👎/コメント) ---------- */
+async function loadVotes(){
+  VOTES = {};
+  const {data} = await sb.from('v2_vote').select('*').eq('catalog_date', CATDATE);
+  (data||[]).forEach(v=>{
+    const k = claimKey(v.kind,v.theme,v.angle_title);
+    const o = VOTES[k] || (VOTES[k]={up:0,down:0,mine:0});
+    if(v.vote===1) o.up++; else if(v.vote===-1) o.down++;
+    if(v.user_email===ME.email) o.mine = v.vote;
+  });
+}
+async function loadLearning(){
+  const {data} = await sb.from('v2_learning').select('*').eq('active',true).order('created_at',{ascending:false}).limit(8);
+  LEARNING = data || [];
+}
+function renderLearning(){
+  const box = $('learnStrip'); if(!box) return;
+  if(!LEARNING.length){ box.innerHTML=''; return; }
+  const map = {exclude_theme:['ex','除外'],exclude_angle:['ex','除外'],boost_theme:['bo','強化'],deboost_theme:['no','抑制'],reword_angle:['rw','言い換え'],add_keyword:['kw','語を追加'],want_theme:['wa','追加希望'],note:['no','メモ']};
+  const chips = LEARNING.map(l=>{
+    const m = map[l.action] || ['no',l.action];
+    const label = l.theme || (l.payload && (l.payload.keyword||l.payload.text)) || '';
+    return `<span class="lchip"><span class="lt ${m[0]}">${m[1]}</span>${label}</span>`;
+  }).join('');
+  box.innerHTML = `<div class="learnstrip"><div class="lh">🧠 最近みんなの声から反映した学習</div><div class="lchips">${chips}</div></div>`;
+}
+function voteCounts(kind,theme,angle){ return VOTES[claimKey(kind,theme,angle)] || {up:0,down:0,mine:0}; }
+
+function renderFbRow(el, kind, theme, angle){
+  el.dataset.fk = kind; el.dataset.ft = theme; el.dataset.fa = (angle||'');
+  const v = voteCounts(kind,theme,angle);
+  el.innerHTML = '';
+  const mk = (cls,label,fn)=>{ const b=document.createElement('button'); b.className=cls; b.innerHTML=label; b.onclick=(e)=>{e.stopPropagation();fn();}; return b; };
+  el.appendChild(mk('vbtn up'+(v.mine===1?' on':''), `👍<span class="vn">${v.up||''}</span>`, ()=>setVote(kind,theme,angle,1)));
+  el.appendChild(mk('vbtn down'+(v.mine===-1?' on':''), `👎<span class="vn">${v.down||''}</span>`, ()=>setVote(kind,theme,angle,-1)));
+  const cb = mk('cmtbtn','💬 気づき・改善', ()=>toggleCmtBox(el,kind,theme,angle));
+  el.appendChild(cb);
+}
+function refreshFbRows(){
+  document.querySelectorAll('.fbrow[data-fk]').forEach(el=>{
+    if(el.querySelector('.cmtbox')) return; // 入力中は触らない
+    renderFbRow(el, el.dataset.fk, el.dataset.ft, el.dataset.fa||null);
+  });
+}
+async function setVote(kind,theme,angle,v){
+  const key = claimKey(kind,theme,angle);
+  const cur = (VOTES[key]||{}).mine || 0;
+  if(cur===v){
+    const {error}=await sb.from('v2_vote').delete().eq('user_email',ME.email).eq('catalog_date',CATDATE).eq('kind',kind).eq('theme',theme).eq('angle_title',(angle||''));
+    if(error){toast('取消エラー：'+error.message);return;}
+    toast('取り消しました');
+  } else {
+    const {error}=await sb.from('v2_vote').upsert({user_email:ME.email,catalog_date:CATDATE,kind,theme,angle_title:(angle||''),vote:v,updated_at:new Date().toISOString()},{onConflict:'user_email,catalog_date,kind,theme,angle_title'});
+    if(error){toast('保存エラー：'+error.message);return;}
+    toast(v===1?'👍 良い、として記録しました':'👎 これは違う、として記録しました');
+  }
+  await loadVotes(); refreshFbRows();
+}
+function toggleCmtBox(el,kind,theme,angle){
+  const open = el.parentElement.querySelector('.cmtbox');
+  if(open){ open.remove(); return; }
+  const box = document.createElement('div'); box.className='cmtbox';
+  box.innerHTML = `<textarea placeholder="気づき・改善を書いてください（例：この切り口は言い回しが不自然／季節が外れている／もっと単価が高い商品にしてほしい）"></textarea>
+    <div class="cbar"><button class="send">送信</button><button class="cancel">閉じる</button><span class="cmthint">明日の生成に反映されます</span></div>`;
+  box.onclick=(e)=>e.stopPropagation();
+  el.insertAdjacentElement('afterend', box);
+  const ta = box.querySelector('textarea'); ta.focus();
+  box.querySelector('.cancel').onclick=(e)=>{e.stopPropagation();box.remove();};
+  box.querySelector('.send').onclick=(e)=>{e.stopPropagation();submitComment(kind,theme,angle,ta.value,box);};
+}
+async function submitComment(kind,theme,angle,body,box){
+  if(!body.trim()){ toast('コメントを入力してください'); return; }
+  const {error}=await sb.from('v2_comment').insert({user_email:ME.email,user_name:ME.name,catalog_date:CATDATE,kind,theme,angle_title:(angle||''),body:body.trim()});
+  if(error){ toast('送信エラー：'+error.message); return; }
+  box.remove();
+  toast('コメントを送りました。明日の生成に反映されます');
+}
 
 /* ---------- 上部の統計・フィルタ ---------- */
 function renderStats(){
@@ -319,9 +430,11 @@ function renderThemes(){
       card.innerHTML = `<div class="tt">${t.t}<span class="tb ${t.o}">${t.o==='shun'?'旬':'常時'}</span>${t.gt?'<span class="gtb">📈トレンド</span>':''}${t.pin?'<span class="pinb">★</span>':''}</div>
         <div class="tbot"><span class="tang">切り口 <b>${t.ang}</b></span><span class="tarrow">深掘る→</span></div>
         <div class="treason"><span class="rz">理由</span><span>${t.memo}</span></div>
-        <div class="claimrow"></div>`;
+        <div class="claimrow"></div>
+        <div class="fbrow"></div>`;
       renderClaimRow(card.querySelector('.claimrow'), 'theme', t.t, null);
-      card.onclick = (e)=>{ if(e.target.closest('.claimrow'))return; openAngles(t,card,grid); };
+      renderFbRow(card.querySelector('.fbrow'), 'theme', t.t, null);
+      card.onclick = (e)=>{ if(e.target.closest('.claimrow')||e.target.closest('.fbrow')||e.target.closest('.cmtbox'))return; openAngles(t,card,grid); };
       grid.appendChild(card);
     });
     area.appendChild(sec);
@@ -431,9 +544,10 @@ async function openAngles(theme,card,grid){
   fb.innerHTML=`<h3><span class="ck">✓</span>「${theme.t}」→ ${finalAngles.length} 件の切り口</h3><div class="fb-sub">各切り口を「対応する」と、誰が担当か共有されます。</div>`;
   finalAngles.forEach(a=>{
     const el=document.createElement('div'); el.className='finalangle';
-    el.innerHTML=`<div class="fa-t">${a.t}<span class="src ${a.src}">${a.src==='data'?'データ裏付け':'判定で救済'}</span></div><div class="fa-r">${a.note}</div><div class="claimrow" data-kind="angle" data-theme="${theme.t.replace(/"/g,'&quot;')}" data-angle="${a.t.replace(/"/g,'&quot;')}"></div>`;
+    el.innerHTML=`<div class="fa-t">${a.t}<span class="src ${a.src}">${a.src==='data'?'データ裏付け':'判定で救済'}</span></div><div class="fa-r">${a.note}</div><div class="claimrow" data-kind="angle" data-theme="${theme.t.replace(/"/g,'&quot;')}" data-angle="${a.t.replace(/"/g,'&quot;')}"></div><div class="fbrow"></div>`;
     fb.appendChild(el);
     renderClaimRow(el.querySelector('.claimrow'),'angle',theme.t,a.t);
+    renderFbRow(el.querySelector('.fbrow'),'angle',theme.t,a.t);
   });
   body.appendChild(fb);
   panelBusy=false;
