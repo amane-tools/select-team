@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Select. — 共有（チーム）</title>
+<style>
+  :root{
+    --bg:#f5f7fb;--panel:#fff;--ink:#1a2236;--ink-soft:#5b6577;--ink-faint:#98a1b3;
+    --line:#e4e9f2;--blue:#3b6fe0;--blue-soft:#eaf0fd;--blue-deep:#2a55b8;
+    --green:#1f9d6b;--green-soft:#e6f6ee;--green-line:#c7e8d6;
+    --amber:#c9871f;--amber-soft:#fbf2dd;--red:#d24a52;--red-soft:#fbe9ea;
+    --purple:#7b5bd6;--purple-soft:#efeafb;--teal:#0f9c8f;--teal-soft:#e2f5f3;--rose:#d65b8a;--rose-soft:#fceaf1;
+    --gray2:#8a92a3;--gray-soft:#f0f2f6;--gold:#d9a441;--gold-soft:#faf3e0;
+    --shadow:0 1px 2px rgba(26,34,54,.04),0 8px 24px rgba(26,34,54,.06);--radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Segoe UI",sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;padding:26px 18px 90px}
+  .wrap{max-width:1060px;margin:0 auto}
+  .topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .brand{display:inline-flex;align-items:baseline;gap:2px;font-size:20px;font-weight:700;letter-spacing:-.02em}
+  .brand .dot{color:var(--blue)}
+  .date{font-size:13px;color:var(--ink-faint);font-weight:600}.date b{color:var(--ink)}
+  h1{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-top:6px;line-height:1.3}
+  .lead{color:var(--ink-soft);margin-top:6px;max-width:740px;font-size:14px}
+  .controls{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin:18px 0}
+  button.run{background:var(--blue);color:#fff;border:none;font-size:14px;font-weight:600;padding:11px 22px;border-radius:10px;cursor:pointer;transition:.18s;box-shadow:0 2px 8px rgba(59,111,224,.28)}
+  button.run:hover{background:var(--blue-deep)} button.run:disabled{opacity:.5;cursor:default;box-shadow:none}
+  button.ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--line);font-size:13px;font-weight:500;padding:10px 16px;border-radius:10px;cursor:pointer}
+  .counter{font-size:13px;color:var(--ink-soft);margin-left:auto}.counter b{color:var(--ink);font-weight:700}
+  .stats{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+  .stat{flex:1;min-width:120px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 15px;box-shadow:var(--shadow)}
+  .stat .n{font-size:24px;font-weight:700;letter-spacing:-.02em}
+  .stat .l{font-size:11px;color:var(--ink-faint);font-weight:600}
+  .stat.blue .n{color:var(--blue)}.stat.teal .n{color:var(--teal)}.stat.purple .n{color:var(--purple)}.stat.gold .n{color:var(--gold)}
+  .catbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .catchip{font-size:12px;font-weight:600;padding:6px 13px;border-radius:100px;border:1px solid var(--line);background:var(--panel);color:var(--ink-soft);cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:6px}
+  .catchip:hover{border-color:var(--ink-faint)}
+  .catchip.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .catchip .cc{width:8px;height:8px;border-radius:2px}
+  .catchip .num{font-size:10px;opacity:.7}
+  .cat-section{margin-bottom:20px;opacity:0;animation:rise .4s forwards}
+  @keyframes rise{to{opacity:1;transform:none}}
+  .cat-head{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;margin-bottom:9px}
+  .cat-head .cc{width:10px;height:10px;border-radius:3px}
+  .cat-head .cn{color:var(--ink-faint);font-weight:600;font-size:11.5px}
+  .tgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+  @media(max-width:820px){.tgrid{grid-template-columns:1fr 1fr}}
+  @media(max-width:540px){.tgrid{grid-template-columns:1fr}}
+  .tcard{border:1px solid var(--line);border-radius:11px;padding:11px 13px;background:var(--panel);box-shadow:var(--shadow);cursor:pointer;transition:.15s;opacity:0;animation:rise .3s forwards}
+  .tcard:hover{border-color:var(--blue);transform:translateY(-1px)}
+  .tcard .tt{font-size:14px;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .tcard .tb{font-size:8.5px;font-weight:700;padding:1px 6px;border-radius:100px}
+  .tb.shun{background:var(--teal-soft);color:var(--teal)}.tb.ever{background:var(--purple-soft);color:var(--purple)}
+  .tcard .tbot{display:flex;align-items:center;gap:8px;margin-top:8px}
+  .tcard .tang{font-size:11px;color:var(--ink-soft);font-weight:600}.tcard .tang b{color:var(--ink)}
+  .tcard .tarrow{margin-left:auto;font-size:11px;color:var(--blue);font-weight:700}
+  .tcard.pin{border-color:var(--gold)} .tcard .pinb{font-size:8.5px;font-weight:700;padding:1px 6px;border-radius:100px;background:var(--gold-soft);color:var(--gold)}
+  .tcard .gtb{font-size:8.5px;font-weight:700;padding:1px 6px;border-radius:100px;background:var(--amber-soft);color:var(--amber)}
+  .tcard .treason{font-size:10.5px;color:var(--ink-faint);margin-top:6px;line-height:1.45;display:flex;align-items:flex-start;gap:4px}
+  .tcard .treason .rz{color:var(--teal);font-weight:700;flex-shrink:0}
+  .empty{color:var(--ink-faint);font-size:14px;text-align:center;padding:44px 0}
+
+  /* ===== 担当バッジ/ボタン ===== */
+  .claimrow{display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap}
+  .cbtn{font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:100px;border:1px solid var(--line);background:#fff;color:var(--ink-soft);cursor:pointer;transition:.15s}
+  .cbtn:hover{border-color:var(--blue);color:var(--blue)}
+  .cbtn.mine{background:var(--blue-soft);color:var(--blue-deep);border-color:#cfe0fb}
+  .cbtn.done{background:var(--green-soft);color:var(--green);border-color:var(--green-line)}
+  .cbtn.mini{padding:2px 8px;font-size:9.5px}
+  .cwho{font-size:10px;font-weight:700;padding:2px 9px;border-radius:100px;background:var(--gray-soft);color:var(--ink-soft);display:inline-flex;align-items:center;gap:5px}
+  .cwho .ini{width:14px;height:14px;border-radius:50%;background:var(--blue);color:#fff;font-size:8px;display:inline-flex;align-items:center;justify-content:center;font-weight:700}
+  .cwho.done{background:var(--green-soft);color:var(--green)} .cwho.done .ini{background:var(--green)}
+
+  /* ===== 切り口展開ビュー ===== */
+  .tcard.chosen{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue),var(--shadow)}
+  .angle-panel{grid-column:1/-1;background:linear-gradient(180deg,#fbfcfe,#fff);border:1px solid var(--blue);border-radius:var(--radius);padding:18px 20px;margin:4px 0 6px;box-shadow:var(--shadow);opacity:0;animation:rise .3s forwards}
+  .ap-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-bottom:12px;border-bottom:1px solid var(--line);margin-bottom:14px}
+  .ap-head .p2tag{font-size:11px;font-weight:700;padding:3px 11px;border-radius:100px;background:var(--purple-soft);color:var(--purple)}
+  .ap-head h2{font-size:18px;font-weight:700;letter-spacing:-.02em}
+  .ap-head .closebtn{margin-left:auto;font-size:12px;font-weight:600;color:var(--ink-soft);border:1px solid var(--line);background:#fff;padding:6px 13px;border-radius:8px;cursor:pointer}
+  .themein{background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px 16px;margin-bottom:12px}
+  .themein .ti-t{font-size:15px;font-weight:700;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .themein .ti-t .sb{font-size:10px;font-weight:700;padding:2px 9px;border-radius:100px;background:var(--teal-soft);color:var(--teal)}
+  .themein .ti-meta{font-size:12px;color:var(--ink-soft);margin-top:5px}
+  .seclabel{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;color:var(--ink-soft);margin:20px 0 11px;flex-wrap:wrap}
+  .seclabel .pip{width:7px;height:7px;border-radius:2px}
+  .seclabel .hint{font-weight:400;color:var(--ink-faint);font-size:12.5px}
+  .back{background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px 16px}
+  .back .bh{font-size:12px;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .back .bh .ic{width:19px;height:19px;border-radius:6px;background:var(--rose);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700}
+  .co-line{font-size:11.5px;color:var(--ink-soft);background:#fbfcfe;border:1px solid var(--line);border-left:2px solid var(--rose);border-radius:7px;padding:5px 9px;margin-bottom:4px;display:flex;gap:8px;flex-wrap:wrap}
+  .co-line .from{font-size:9px;font-weight:700;color:var(--rose);background:var(--rose-soft);padding:0 6px;border-radius:4px;margin-left:auto}
+  .angle{border:1px solid var(--line);border-radius:11px;padding:11px 14px;margin-bottom:8px;background:#fbfcfe}
+  .angle.backed{border-left:3px solid var(--green)} .angle.gray{border-left:3px solid var(--amber);background:#fdf6ec} .angle.out{border-left:3px solid var(--red);background:var(--red-soft)}
+  .angle .atitle{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .angle .atitle .st{font-size:9px;font-weight:700;padding:1px 7px;border-radius:100px}
+  .st.b{background:var(--green-soft);color:var(--green)} .st.g{background:var(--amber-soft);color:var(--amber)} .st.o{background:var(--red-soft);color:var(--red)}
+  .angle .acombo{font-size:10px;color:var(--ink-faint);margin-top:3px;display:flex;flex-wrap:wrap;gap:5px}
+  .angle .acombo .ct{font-weight:700;padding:0 6px;border-radius:4px}
+  .ct.nayami{background:var(--rose-soft);color:var(--rose)} .ct.scene{background:var(--teal-soft);color:var(--teal)}
+  .ct.buy{background:var(--blue-soft);color:var(--blue-deep)} .ct.attr{background:var(--purple-soft);color:var(--purple)}
+  .angle .aline{font-size:11px;margin-top:5px;padding-top:5px;border-top:1px dashed var(--line)}
+  .angle .aline.ev{color:var(--green)} .angle .aline.gr{color:var(--amber)} .angle .aline.od{color:var(--red)}
+  .judge{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+  .judge .jh{font-size:13px;font-weight:700;display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:11px}
+  .judge .jh .graytag{font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:100px;background:var(--amber-soft);color:var(--amber)}
+  .jrow{display:grid;grid-template-columns:64px 1fr 46px;gap:9px;align-items:center;font-size:12px;padding:6px 0;border-bottom:1px dashed var(--line)}
+  .jrow:last-of-type{border-bottom:none}
+  .jrow .jk{font-weight:700;color:var(--ink-soft);font-size:11px}
+  .jrow .jm{text-align:center;font-size:13px;font-weight:700}
+  .jm.ok{color:var(--green)} .jm.ng{color:var(--red)}
+  .jverdict{margin-top:11px;padding-top:11px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:flex-start}
+  .jverdict .seal{font-size:10.5px;font-weight:700;padding:4px 11px;border-radius:100px;white-space:nowrap}
+  .seal.save{background:var(--green-soft);color:var(--green)} .seal.cut{background:var(--red-soft);color:var(--red)}
+  .jverdict .jr{font-size:12px;color:var(--ink)} .jverdict .jr .lb{font-weight:700;color:var(--blue-deep)}
+  .finalbox{background:linear-gradient(180deg,#fff,#f4fbf8);border:1px solid var(--green-line);border-radius:12px;padding:16px;margin-top:14px}
+  .finalbox h3{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;color:var(--ink)} .finalbox h3 .ck{color:var(--green)}
+  .finalbox .fb-sub{font-size:12px;color:var(--ink-soft);margin:5px 0 13px}
+  .finalangle{border:1px solid var(--green-line);border-radius:10px;padding:10px 13px;margin-bottom:7px;background:var(--green-soft)}
+  .finalangle .fa-t{font-size:13.5px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .finalangle .fa-t .src{font-size:8.5px;font-weight:700;padding:1px 7px;border-radius:100px}
+  .src.data{background:#fff;color:var(--green);border:1px solid var(--green-line)} .src.saved{background:#fff;color:var(--purple);border:1px solid #d8cdf3}
+  .finalangle .fa-r{font-size:11px;color:var(--ink-soft);margin-top:2px}
+
+  /* ===== ログイン画面 ===== */
+  .gate{position:fixed;inset:0;background:linear-gradient(180deg,#eef2fb,#f5f7fb);display:flex;align-items:center;justify-content:center;z-index:50}
+  .gate .card{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:34px 32px;max-width:400px;width:92%;text-align:center}
+  .gate h2{font-size:22px;font-weight:700;letter-spacing:-.02em}
+  .gate p{font-size:13px;color:var(--ink-soft);margin:10px 0 22px;line-height:1.6}
+  .gbtn{display:inline-flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 20px;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;box-shadow:var(--shadow);transition:.15s}
+  .gbtn:hover{border-color:var(--blue)}
+  .gbtn .g{width:18px;height:18px}
+  .gerr{color:var(--red);font-size:12.5px;margin-top:16px}
+  /* ユーザーチップ */
+  .userchip{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--ink-soft);background:#fff;border:1px solid var(--line);border-radius:100px;padding:4px 6px 4px 12px}
+  .userchip .rolebadge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:100px}
+  .rolebadge.admin{background:var(--blue-soft);color:var(--blue-deep)} .rolebadge.worker{background:var(--gray-soft);color:var(--ink-soft)}
+  .userchip button{font-size:11px;border:none;background:var(--gray-soft);color:var(--ink-soft);border-radius:100px;padding:4px 10px;cursor:pointer}
+
+  /* ===== メンバー管理 ===== */
+  .admin{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);margin-top:14px}
+  .admin h2{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:4px}
+  .admin .sub{font-size:12px;color:var(--ink-faint);margin-bottom:16px}
+  .addrow{display:flex;gap:8px;flex-wrap:wrap;background:var(--gray-soft);border-radius:12px;padding:12px;margin-bottom:16px}
+  .addrow input,.addrow select{border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:13px;font-family:inherit}
+  .addrow input.email{flex:2;min-width:220px} .addrow input.name{flex:1;min-width:120px}
+  .addrow button{background:var(--blue);color:#fff;border:none;border-radius:9px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer}
+  .mrow{display:flex;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid var(--line)}
+  .mrow .ini{width:34px;height:34px;border-radius:50%;background:var(--blue-soft);color:var(--blue-deep);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+  .mrow .mname{font-size:14px;font-weight:700} .mrow .memail{font-size:12px;color:var(--ink-soft)}
+  .mrow .msp{margin-left:auto;display:flex;gap:8px;align-items:center}
+  .mrow select{border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:12px;font-family:inherit}
+  .mrow .del{border:1px solid var(--red);color:var(--red);background:#fff;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer}
+  .hidden{display:none!important}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;padding:10px 18px;border-radius:10px;box-shadow:var(--shadow);z-index:60;opacity:0;transition:.2s}
+  .toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<!-- ログイン画面 -->
+<div class="gate" id="gate">
+  <div class="card">
+    <div class="brand" style="font-size:26px;justify-content:center">Select<span class="dot">.</span></div>
+    <h2 style="margin-top:8px">チーム共有</h2>
+    <p>登録メンバーのみ利用できます。<br>Googleアカウントでログインしてください。</p>
+    <button class="gbtn" id="loginBtn">
+      <svg class="g" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.9 2.4 30.4 0 24 0 14.6 0 6.4 5.4 2.5 13.3l7.9 6.1C12.3 13.2 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.5 3-2.2 5.5-4.7 7.2l7.3 5.7C43.9 37.9 46.5 31.8 46.5 24.5z"/><path fill="#FBBC05" d="M10.4 28.6c-.5-1.5-.8-3-.8-4.6s.3-3.1.8-4.6l-7.9-6.1C.9 16.5 0 20.1 0 24s.9 7.5 2.5 10.7l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.4 0 11.9-2.1 15.9-5.8l-7.3-5.7c-2 1.4-4.7 2.3-8.6 2.3-6.3 0-11.7-3.7-13.6-9.4l-7.9 6.1C6.4 42.6 14.6 48 24 48z"/></svg>
+      Googleでログイン
+    </button>
+    <div class="gerr hidden" id="gateErr"></div>
+  </div>
+</div>
+
+<!-- メインアプリ -->
+<div class="wrap hidden" id="app">
+  <div class="topbar">
+    <span class="brand">Select<span class="dot">.</span></span>
+    <span class="date" id="dateLbl"></span>
+    <span style="margin-left:auto" class="userchip" id="userChip"></span>
+  </div>
+  <h1>今日のテーマから選び、切り口まで深掘る</h1>
+  <p class="lead">毎朝の自動生成カタログ。テーマ・切り口を<b>「担当する」</b>と、誰が対応中／対応済みかがチームで共有されます。</p>
+
+  <div class="controls">
+    <button class="ghost" id="reloadBtn">🔄 最新を再読込</button>
+    <button class="ghost hidden" id="adminBtn">👥 メンバー管理</button>
+    <span class="counter" id="counter"></span>
+  </div>
+
+  <div id="area"><div class="empty">読み込み中…</div></div>
+
+  <!-- メンバー管理（管理者のみ） -->
+  <div class="admin hidden" id="adminPage">
+    <div style="display:flex;align-items:center"><h2>👥 メンバー管理（管理者）</h2>
+      <button class="ghost" style="margin-left:auto" id="adminBack">← 一覧に戻る</button></div>
+    <div class="sub">メンバーを追加すると、そのメールでGoogleログインできるようになります。</div>
+    <div class="addrow">
+      <input class="email" id="addEmail" placeholder="メールアドレス（Googleログインに使う）">
+      <input class="name" id="addName" placeholder="表示名（任意）">
+      <select id="addRole"><option value="作業者">作業者</option><option value="管理者">管理者</option></select>
+      <button id="addBtn">追加</button>
+    </div>
+    <div id="memberList"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB_URL = "https://jvnyavatcwxuljjujxua.supabase.co";
+const SB_KEY = "sb_publishable_hbtP3WrNCJp0BUuBrDs4Ww_6x79K4uc";
+const sb = supabase.createClient(SB_URL, SB_KEY);
+
+let ME = null;          // {email,name,role}
+let CATALOG = null;     // payload
+let CATS = {}, THEMES = [], ANGLE_DATA = {}, ASSIGN = [];
+let CATDATE = null;
+let CLAIMS = {};        // key -> {user_email,user_name,status}
+let filter = 'all', panelBusy = false;
+const CTL = {nayami:"悩み",scene:"シーン",buy:"購買軸",attr:"属性"};
+
+const $ = id => document.getElementById(id);
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);}
+function ini(name){return (name||'?').trim().charAt(0);}
+
+/* ---------- 認証 ---------- */
+$('loginBtn').onclick = ()=> sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.href.split('#')[0]}});
+
+async function boot(){
+  const {data:{session}} = await sb.auth.getSession();
+  if(!session){ showGate(); return; }
+  // メンバー確認
+  const email = session.user.email;
+  const {data:me, error} = await sb.from('v2_member').select('*').eq('email', email).eq('active',true).maybeSingle();
+  if(error){ showGate('接続エラー：'+error.message); return; }
+  if(!me){ showGate('このアカウント（'+email+'）は登録されていません。管理者に追加を依頼してください。'); return; }
+  ME = me;
+  $('gate').classList.add('hidden'); $('app').classList.remove('hidden');
+  renderUser();
+  if(ME.role==='管理者') $('adminBtn').classList.remove('hidden');
+  await loadCatalog();
+}
+function showGate(msg){
+  $('app').classList.add('hidden'); $('gate').classList.remove('hidden');
+  const e=$('gateErr'); if(msg){e.textContent=msg;e.classList.remove('hidden');} else e.classList.add('hidden');
+}
+function renderUser(){
+  const roleCls = ME.role==='管理者'?'admin':'worker';
+  $('userChip').innerHTML = `<span>${ME.name||ME.email}</span><span class="rolebadge ${roleCls}">${ME.role}</span><button id="logoutBtn">ログアウト</button>`;
+  $('logoutBtn').onclick = async()=>{ await sb.auth.signOut(); location.reload(); };
+}
+sb.auth.onAuthStateChange((_e,s)=>{ if(_e==='SIGNED_IN') boot(); });
+
+/* ---------- カタログ読込 ---------- */
+async function loadCatalog(){
+  $('area').innerHTML = '<div class="empty">読み込み中…</div>';
+  const {data,error} = await sb.from('v2_catalog').select('*').order('date',{ascending:false}).limit(1);
+  if(error){ $('area').innerHTML='<div class="empty">読み込みエラー：'+error.message+'</div>'; return; }
+  if(!data || !data.length){ $('area').innerHTML='<div class="empty">まだカタログがありません。<br>Mac側で毎朝のバッチが1回走ると、ここに今日のテーマが並びます。</div>'; return; }
+  const row = data[0];
+  CATALOG = row.payload; CATDATE = row.date;
+  CATS = CATALOG.CATS || {}; THEMES = CATALOG.THEMES || []; ANGLE_DATA = CATALOG.ANGLE_DATA || {}; ASSIGN = CATALOG.ASSIGN || [];
+  $('dateLbl').innerHTML = `今日のカタログ <b>${row.date}</b>`;
+  await loadClaims();
+  renderStats(); renderFilter(); renderThemes();
+}
+async function loadClaims(){
+  CLAIMS = {};
+  const {data} = await sb.from('v2_claim').select('*').eq('catalog_date', CATDATE);
+  (data||[]).forEach(c=>{ CLAIMS[claimKey(c.kind,c.theme,c.angle_title)] = c; });
+}
+function claimKey(kind,theme,angle){ return kind+'::'+theme+'::'+(angle||''); }
+
+/* ---------- 上部の統計・フィルタ ---------- */
+function renderStats(){
+  const totalAng = THEMES.reduce((n,t)=>n+t.ang,0);
+  const claimed = Object.values(CLAIMS).filter(c=>c.kind==='theme').length;
+  const done = Object.values(CLAIMS).filter(c=>c.kind==='theme'&&c.status==='done').length;
+  $('counter').innerHTML = `テーマ <b>${THEMES.length}</b>・切り口 <b>${totalAng}</b>`;
+}
+function renderFilter(){
+  const cats = Object.keys(CATS);
+  let html = `<span class="catchip ${filter==='all'?'active':''}" data-f="all">すべて<span class="num">${THEMES.length}</span></span>`;
+  cats.forEach(c=>{
+    const n = THEMES.filter(t=>t.cat===c).length; if(!n) return;
+    html += `<span class="catchip ${filter===c?'active':''}" data-f="${c}"><span class="cc" style="background:${CATS[c].c}"></span>${c}<span class="num">${n}</span></span>`;
+  });
+  const bar = document.createElement('div'); bar.className='catbar'; bar.id='catbar'; bar.innerHTML=html;
+  const old = $('catbar'); if(old) old.remove();
+  $('area').before(bar);
+  bar.querySelectorAll('.catchip').forEach(ch=> ch.onclick=()=>{ filter=ch.dataset.f; renderFilter(); renderThemes(); });
+}
+
+/* ---------- テーマ一覧 ---------- */
+function renderThemes(){
+  const area = $('area'); area.innerHTML='';
+  const cats = Object.keys(CATS);
+  const showCats = filter==='all'? cats : [filter];
+  showCats.forEach((cat,idx)=>{
+    const themes = THEMES.filter(t=>t.cat===cat).sort((a,b)=>b.score-a.score);
+    if(!themes.length) return;
+    const sec = document.createElement('div'); sec.className='cat-section'; sec.style.animationDelay=(idx*.04)+'s';
+    const totAng = themes.reduce((n,t)=>n+t.ang,0);
+    sec.innerHTML = `<div class="cat-head"><span class="cc" style="background:${CATS[cat].c}"></span>${cat}<span class="cn">テーマ${themes.length}・切り口${totAng}</span></div><div class="tgrid"></div>`;
+    const grid = sec.querySelector('.tgrid');
+    themes.forEach((t,i)=>{
+      const card = document.createElement('div'); card.className='tcard'+(t.pin?' pin':''); card.style.animationDelay=(i*.02)+'s';
+      card.innerHTML = `<div class="tt">${t.t}<span class="tb ${t.o}">${t.o==='shun'?'旬':'常時'}</span>${t.gt?'<span class="gtb">📈トレンド</span>':''}${t.pin?'<span class="pinb">★</span>':''}</div>
+        <div class="tbot"><span class="tang">切り口 <b>${t.ang}</b></span><span class="tarrow">深掘る→</span></div>
+        <div class="treason"><span class="rz">理由</span><span>${t.memo}</span></div>
+        <div class="claimrow"></div>`;
+      renderClaimRow(card.querySelector('.claimrow'), 'theme', t.t, null);
+      card.onclick = (e)=>{ if(e.target.closest('.claimrow'))return; openAngles(t,card,grid); };
+      grid.appendChild(card);
+    });
+    area.appendChild(sec);
+  });
+}
+
+/* ---------- 担当バッジ/ボタン ---------- */
+function renderClaimRow(el, kind, theme, angle){
+  const key = claimKey(kind,theme,angle);
+  const c = CLAIMS[key];
+  el.innerHTML='';
+  const mkBtn=(txt,cls,fn)=>{const b=document.createElement('button');b.className='cbtn '+cls;b.textContent=txt;b.onclick=(e)=>{e.stopPropagation();fn();};return b;};
+  if(!c){
+    el.appendChild(mkBtn(kind==='theme'?'担当する':'対応する','', ()=>setClaim(kind,theme,angle,'claimed')));
+  } else if(c.user_email===ME.email){
+    if(c.status==='claimed'){
+      const w=document.createElement('span');w.className='cwho';w.innerHTML=`<span class="ini">${ini(c.user_name)}</span>自分が担当中`;el.appendChild(w);
+      el.appendChild(mkBtn('対応済み','done mini',()=>setClaim(kind,theme,angle,'done')));
+      el.appendChild(mkBtn('やめる','mini',()=>removeClaim(kind,theme,angle)));
+    } else {
+      const w=document.createElement('span');w.className='cwho done';w.innerHTML=`<span class="ini">✓</span>自分が対応済み`;el.appendChild(w);
+      el.appendChild(mkBtn('戻す','mini',()=>setClaim(kind,theme,angle,'claimed')));
+    }
+  } else {
+    const w=document.createElement('span');w.className='cwho'+(c.status==='done'?' done':'');
+    w.innerHTML=`<span class="ini">${c.status==='done'?'✓':ini(c.user_name)}</span>${c.user_name||c.user_email}${c.status==='done'?' 対応済み':' が担当中'}`;
+    el.appendChild(w);
+    if(ME.role==='管理者') el.appendChild(mkBtn('解除','mini',()=>removeClaim(kind,theme,angle)));
+  }
+}
+async function setClaim(kind,theme,angle,status){
+  const rec={catalog_date:CATDATE,kind,theme,angle_title:(angle||''),status,user_email:ME.email,user_name:ME.name,updated_at:new Date().toISOString()};
+  const {error}=await sb.from('v2_claim').upsert(rec,{onConflict:'catalog_date,kind,theme,angle_title'});
+  if(error){ toast('保存エラー：'+error.message); return; }
+  await loadClaims(); refreshClaimRows(); toast(status==='done'?'対応済みにしました':'担当にしました');
+}
+async function removeClaim(kind,theme,angle){
+  const {error} = await sb.from('v2_claim').delete()
+    .eq('catalog_date',CATDATE).eq('kind',kind).eq('theme',theme).eq('angle_title',(angle||''));
+  if(error){ toast('解除エラー：'+error.message); return; }
+  await loadClaims(); refreshClaimRows(); toast('解除しました');
+}
+function refreshClaimRows(){
+  document.querySelectorAll('.claimrow[data-kind]').forEach(el=>{
+    renderClaimRow(el, el.dataset.kind, el.dataset.theme, el.dataset.angle||null);
+  });
+  // テーマカードのclaimrowは data 属性を持たないので個別再描画
+  renderThemes();
+}
+
+/* ---------- 切り口工房（展開） ---------- */
+function genericAngles(theme){
+  return {origin:theme.o==='shun'?"旬":"常時",timing:theme.o==='shun'?"時期性あり":"—",risk:"景表法/薬機法",
+    cooccur:[[`${theme.t} おすすめ`,"軸ライブラリ"],[`${theme.t} 選び方`,"軸ライブラリ"],[`${theme.t} 人気`,"軸ライブラリ"]],
+    angles:[{t:`${theme.t}の定番おすすめ`,st:"backed",c:[["buy","定番"]],line:`『${theme.t} おすすめ』で裏付け`}]};
+}
+async function openAngles(theme,card,grid){
+  if(panelBusy)return;
+  const existing=grid.querySelector('.angle-panel');
+  if(existing && existing.dataset.for===theme.t){existing.remove();card.classList.remove('chosen');return;}
+  if(existing)existing.remove();
+  grid.querySelectorAll('.tcard').forEach(c=>c.classList.remove('chosen'));
+  card.classList.add('chosen'); panelBusy=true;
+  const data=ANGLE_DATA[theme.t]||genericAngles(theme);
+  const panel=document.createElement('div'); panel.className='angle-panel'; panel.dataset.for=theme.t;
+  card.insertAdjacentElement('afterend',panel);
+  panel.innerHTML=`<div class="ap-head"><span class="p2tag">切り口工房</span><h2>「${theme.t}」の切り口</h2><button class="closebtn">閉じる ✕</button></div><div id="apBody"></div>`;
+  panel.querySelector('.closebtn').onclick=(e)=>{e.stopPropagation();panel.remove();card.classList.remove('chosen');panelBusy=false;};
+  const body=panel.querySelector('#apBody');
+  // テーマ受取
+  body.insertAdjacentHTML('beforeend',`<div class="themein"><div class="ti-t">${theme.t}<span class="sb">${data.origin}</span></div><div class="ti-meta">時期：${data.timing} ／ カテゴリ：${theme.cat}</div></div>`);
+  // 裏取り
+  body.insertAdjacentHTML('beforeend',`<div class="seclabel"><span class="pip" style="background:var(--rose)"></span>01 — 実データで裏取り<span class="hint">「${theme.t} × 何」の共起語</span></div>`);
+  const back=document.createElement('div'); back.className='back';
+  back.innerHTML=`<div class="bh"><span class="ic">実</span>「${theme.t}」との共起語</div>`;
+  data.cooccur.forEach(([q,f])=>{const el=document.createElement('div');el.className='co-line';el.innerHTML=`「${q}」<span class="from">${f}</span>`;back.appendChild(el);});
+  body.appendChild(back);
+  // 掛け算・仕分け
+  body.insertAdjacentHTML('beforeend',`<div class="seclabel"><span class="pip" style="background:var(--purple)"></span>02 — 掛け算で切り口を作り仕分け<span class="hint">リスクの目：${data.risk}</span></div>`);
+  const stMap={backed:['b','◆ 裏付けあり','ev'],gray:['g','△ グレー','gr'],out:['o','✕ 除外','od']};
+  data.angles.forEach(a=>{
+    const el=document.createElement('div'); el.className='angle '+a.st;
+    const combos=a.c.map(x=>`<span class="ct ${x[0]}">${CTL[x[0]]}:${x[1]}</span>`).join('');
+    const [stcls,stlabel,linecls]=stMap[a.st];
+    el.innerHTML=`<div class="atitle">${a.t}<span class="st ${stcls}">${stlabel}</span></div><div class="acombo">${combos}</div><div class="aline ${linecls}">${a.line}</div>`;
+    body.appendChild(el);
+  });
+  // グレー判定
+  const grays=data.angles.filter(a=>a.st==='gray');
+  if(grays.length){
+    body.insertAdjacentHTML('beforeend',`<div class="seclabel"><span class="pip" style="background:var(--amber)"></span>03 — グレーだけ“1回の判定”</div>`);
+    grays.forEach(g=>{
+      const jd=g.judge; const j=document.createElement('div'); j.className='judge';
+      j.innerHTML=`<div class="jh">${g.t}<span class="graytag">グレー</span></div>
+        <div class="jrow"><span class="jk">買う人</span><span>${jd.who}</span><span class="jm ${jd.ok[0]?'ok':'ng'}">${jd.ok[0]?'✓':'✕'}</span></div>
+        <div class="jrow"><span class="jk">買う場面</span><span>${jd.when}</span><span class="jm ${jd.ok[1]?'ok':'ng'}">${jd.ok[1]?'✓':'✕'}</span></div>
+        <div class="jrow"><span class="jk">買う理由</span><span>${jd.why}</span><span class="jm ${jd.ok[2]?'ok':'ng'}">${jd.ok[2]?'✓':'✕'}</span></div>
+        <div class="jverdict"><span class="seal ${g.verdict}">${g.verdict==='save'?'✓ 救済':'✕ 除外'}</span><span class="jr"><span class="lb">判定：</span>${g.vreason}</span></div>`;
+      body.appendChild(j);
+    });
+  }
+  // 最終（＋切り口ごとの担当ボタン）
+  const backed=data.angles.filter(a=>a.st==='backed');
+  const saved=grays.filter(g=>g.verdict==='save');
+  const finalAngles=[...backed.map(b=>({t:b.t,src:'data',note:b.line})),...saved.map(s=>({t:s.t,src:'saved',note:s.vreason}))];
+  const fb=document.createElement('div'); fb.className='finalbox';
+  fb.innerHTML=`<h3><span class="ck">✓</span>「${theme.t}」→ ${finalAngles.length} 件の切り口</h3><div class="fb-sub">各切り口を「対応する」と、誰が担当か共有されます。</div>`;
+  finalAngles.forEach(a=>{
+    const el=document.createElement('div'); el.className='finalangle';
+    el.innerHTML=`<div class="fa-t">${a.t}<span class="src ${a.src}">${a.src==='data'?'データ裏付け':'判定で救済'}</span></div><div class="fa-r">${a.note}</div><div class="claimrow" data-kind="angle" data-theme="${theme.t.replace(/"/g,'&quot;')}" data-angle="${a.t.replace(/"/g,'&quot;')}"></div>`;
+    fb.appendChild(el);
+    renderClaimRow(el.querySelector('.claimrow'),'angle',theme.t,a.t);
+  });
+  body.appendChild(fb);
+  panelBusy=false;
+}
+
+/* ---------- メンバー管理（管理者） ---------- */
+$('adminBtn').onclick = ()=>{ $('adminPage').classList.remove('hidden'); renderMembers(); $('adminPage').scrollIntoView({behavior:'smooth'}); };
+$('adminBack').onclick = ()=> $('adminPage').classList.add('hidden');
+$('addBtn').onclick = async()=>{
+  const email=$('addEmail').value.trim().toLowerCase(), name=$('addName').value.trim(), role=$('addRole').value;
+  if(!email){ toast('メールを入力してください'); return; }
+  const {error}=await sb.from('v2_member').upsert({email,name:name||email,role,active:true},{onConflict:'email'});
+  if(error){ toast('追加エラー：'+error.message); return; }
+  $('addEmail').value=''; $('addName').value=''; renderMembers(); toast('メンバーを追加しました');
+};
+async function renderMembers(){
+  const {data,error}=await sb.from('v2_member').select('*').order('role').order('name');
+  const box=$('memberList'); if(error){box.innerHTML='読込エラー：'+error.message;return;}
+  box.innerHTML=`<div style="font-size:12.5px;font-weight:700;color:var(--ink-soft);margin-bottom:6px">メンバー一覧（${data.length}名）</div>`;
+  data.forEach(m=>{
+    const row=document.createElement('div'); row.className='mrow';
+    row.innerHTML=`<div class="ini">${ini(m.name)}</div><div><div class="mname">${m.name||''}</div><div class="memail">${m.email}</div></div>
+      <div class="msp">
+        <select>${['作業者','管理者'].map(r=>`<option ${m.role===r?'selected':''}>${r}</option>`).join('')}</select>
+        <button class="del">削除</button>
+      </div>`;
+    row.querySelector('select').onchange=async(e)=>{ const {error}=await sb.from('v2_member').update({role:e.target.value}).eq('email',m.email); toast(error?('変更エラー：'+error.message):'権限を変更しました'); };
+    row.querySelector('.del').onclick=async()=>{ if(!confirm(m.email+' を削除しますか？'))return; const {error}=await sb.from('v2_member').delete().eq('email',m.email); if(error){toast('削除エラー：'+error.message);return;} renderMembers(); toast('削除しました'); };
+    box.appendChild(row);
+  });
+}
+
+$('reloadBtn').onclick = ()=> loadCatalog();
+boot();
+</script>
+</body>
+</html>
