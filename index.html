@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Select. — 共有（チーム）</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Ccircle%20cx='16'%20cy='16'%20r='16'%20fill='%231a2236'/%3E%3Ctext%20x='14.5'%20y='21'%20text-anchor='middle'%20font-family='Arial,Helvetica,sans-serif'%20font-size='17'%20font-weight='bold'%20fill='%23ffffff'%3ES%3C/text%3E%3Ccircle%20cx='23.5'%20cy='19'%20r='2.3'%20fill='%233b6fe0'/%3E%3C/svg%3E">
 <style>
   :root{
     --bg:#f5f7fb;--panel:#fff;--ink:#1a2236;--ink-soft:#5b6577;--ink-faint:#98a1b3;
@@ -21,14 +22,19 @@
   .topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
   .brand{display:inline-flex;align-items:baseline;gap:2px;font-size:20px;font-weight:700;letter-spacing:-.02em}
   .brand .dot{color:var(--blue)}
-  .date{font-size:13px;color:var(--ink-faint);font-weight:600}.date b{color:var(--ink)}
+  .logomark{width:30px;height:30px;border-radius:50%;background:var(--ink);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:700;letter-spacing:-.02em;flex-shrink:0}
+  .logomark .d{color:var(--blue)}
+  .date{font-size:12px;color:var(--ink-soft);font-weight:600;background:var(--panel);border:1px solid var(--line);border-radius:100px;padding:4px 11px;white-space:nowrap}.date b{color:var(--ink)}
   h1{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-top:6px;line-height:1.3}
   .lead{color:var(--ink-soft);margin-top:6px;max-width:740px;font-size:14px}
   .controls{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin:18px 0}
   button.run{background:var(--blue);color:#fff;border:none;font-size:14px;font-weight:600;padding:11px 22px;border-radius:10px;cursor:pointer;transition:.18s;box-shadow:0 2px 8px rgba(59,111,224,.28)}
   button.run:hover{background:var(--blue-deep)} button.run:disabled{opacity:.5;cursor:default;box-shadow:none}
   button.ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--line);font-size:13px;font-weight:500;padding:10px 16px;border-radius:10px;cursor:pointer}
-  .counter{font-size:13px;color:var(--ink-soft);margin-left:auto}.counter b{color:var(--ink);font-weight:700}
+  .counter{margin-left:auto;display:inline-flex;gap:8px;flex-wrap:wrap}
+  .cpill{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:6px 12px;font-size:12px;color:var(--ink-soft);white-space:nowrap}
+  .cpill i{font-style:normal;color:var(--ink-faint);font-weight:600}
+  .cpill b{color:var(--ink);font-size:15px;font-weight:700;margin-left:3px}
   .stats{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
   .stat{flex:1;min-width:120px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 15px;box-shadow:var(--shadow)}
   .stat .n{font-size:24px;font-weight:700;letter-spacing:-.02em}
@@ -163,6 +169,7 @@
 <!-- ログイン画面 -->
 <div class="gate" id="gate">
   <div class="card">
+    <div class="logomark" style="width:48px;height:48px;font-size:24px;margin:0 auto 12px">S<span class="d">.</span></div>
     <div class="brand" style="font-size:26px;justify-content:center">Select<span class="dot">.</span></div>
     <h2 style="margin-top:8px">チーム共有</h2>
     <p>登録メンバーのみ利用できます。<br>Googleアカウントでログインしてください。</p>
@@ -177,15 +184,14 @@
 <!-- メインアプリ -->
 <div class="wrap hidden" id="app">
   <div class="topbar">
+    <span class="logomark">S<span class="d">.</span></span>
     <span class="brand">Select<span class="dot">.</span></span>
     <span class="date" id="dateLbl"></span>
     <span style="margin-left:auto" class="userchip" id="userChip"></span>
   </div>
-  <h1>今日のテーマから選び、切り口まで深掘る</h1>
-  <p class="lead">毎朝の自動生成カタログ。テーマ・切り口を<b>「担当する」</b>と、誰が対応中／対応済みかがチームで共有されます。</p>
 
   <div class="controls">
-    <button class="ghost" id="reloadBtn">🔄 最新を再読込</button>
+    <button class="run" id="reloadBtn">🔄 最新を再読込</button>
     <button class="ghost hidden" id="adminBtn">👥 メンバー管理</button>
     <span class="counter" id="counter"></span>
   </div>
@@ -279,7 +285,7 @@ function renderStats(){
   const totalAng = THEMES.reduce((n,t)=>n+t.ang,0);
   const claimed = Object.values(CLAIMS).filter(c=>c.kind==='theme').length;
   const done = Object.values(CLAIMS).filter(c=>c.kind==='theme'&&c.status==='done').length;
-  $('counter').innerHTML = `テーマ <b>${THEMES.length}</b>・切り口 <b>${totalAng}</b>`;
+  $('counter').innerHTML = `<span class="cpill"><i>テーマ</i><b>${THEMES.length}</b></span><span class="cpill"><i>切り口</i><b>${totalAng}</b></span>`;
 }
 function renderFilter(){
   const cats = Object.keys(CATS);
