@@ -64,6 +64,11 @@
   .tcard .tbot{display:flex;align-items:center;gap:8px;margin-top:8px}
   .tcard .tang{font-size:11px;color:var(--ink-soft);font-weight:600}.tcard .tang b{color:var(--ink)}
   .tcard .tarrow{margin-left:auto;font-size:11px;color:var(--blue);font-weight:700}
+  .tcard .digrow{display:flex;margin-top:9px}
+  .tcard .digbtn{margin-left:auto;font-size:11.5px;font-weight:700;color:var(--blue-deep);background:var(--blue-soft);border:1px solid #cfe0fb;border-radius:8px;padding:5px 13px;display:inline-flex;align-items:center;gap:5px;transition:.15s}
+  .tcard:hover .digbtn{background:#dfeafd;border-color:#b7d2fa}
+  .tcard .digbtn .da{transition:.15s}
+  .tcard:hover .digbtn .da{transform:translateX(2px)}
   .tcard.pin{border-color:var(--gold)} .tcard .pinb{font-size:8.5px;font-weight:700;padding:1px 6px;border-radius:100px;background:var(--gold-soft);color:var(--gold)}
   .tcard .gtb{font-size:8.5px;font-weight:700;padding:1px 6px;border-radius:100px;background:var(--amber-soft);color:var(--amber)}
   .tcard .treason{font-size:10.5px;color:var(--ink-faint);margin-top:6px;line-height:1.45;display:flex;align-items:flex-start;gap:4px}
@@ -88,9 +93,9 @@
   .vbtn.up.on{background:var(--green-soft);color:var(--green);border-color:var(--green-line)}
   .vbtn.down.on{background:var(--red-soft);color:var(--red);border-color:#f2c9cc}
   .vbtn .vn{font-size:10px;opacity:.75}
-  .cmtbtn{font-size:11px;font-weight:700;padding:4px 11px;border-radius:100px;border:1px solid #cfe0fb;background:var(--blue-soft);color:var(--blue-deep);cursor:pointer;margin-left:auto}
-  .cmtbtn:hover{background:#dfeafd}
-  .cmtbtn.has{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .cmtbtn{font-size:11px;font-weight:600;padding:4px 11px;border-radius:100px;border:1px solid var(--line);background:var(--gray-soft);color:var(--ink-soft);cursor:pointer;margin-left:auto}
+  .cmtbtn:hover{background:#e6e9ef;border-color:var(--ink-faint)}
+  .cmtbtn.has{background:var(--gray2);color:#fff;border-color:var(--gray2)}
   .cmtbox{width:100%;margin-top:8px}
   .cmtbox textarea{width:100%;border:1px solid #cfe0fb;border-radius:9px;padding:9px 11px;font-size:12.5px;font-family:inherit;resize:vertical;min-height:56px;background:#fbfcff}
   .cmtbox textarea:focus{outline:none;border-color:var(--blue)}
@@ -428,13 +433,12 @@ function renderThemes(){
     themes.forEach((t,i)=>{
       const card = document.createElement('div'); card.className='tcard'+(t.pin?' pin':''); card.style.animationDelay=(i*.02)+'s';
       card.innerHTML = `<div class="tt">${t.t}<span class="tb ${t.o}">${t.o==='shun'?'旬':'常時'}</span>${t.gt?'<span class="gtb">📈トレンド</span>':''}${t.pin?'<span class="pinb">★</span>':''}</div>
-        <div class="tbot"><span class="tang">切り口 <b>${t.ang}</b></span><span class="tarrow">深掘る→</span></div>
+        <div class="tbot"><span class="tang">切り口 <b>${t.ang}</b></span></div>
         <div class="treason"><span class="rz">理由</span><span>${t.memo}</span></div>
-        <div class="claimrow"></div>
-        <div class="fbrow"></div>`;
-      renderClaimRow(card.querySelector('.claimrow'), 'theme', t.t, null);
+        <div class="fbrow"></div>
+        <div class="digrow"><span class="digbtn">深掘る <span class="da">→</span></span></div>`;
       renderFbRow(card.querySelector('.fbrow'), 'theme', t.t, null);
-      card.onclick = (e)=>{ if(e.target.closest('.claimrow')||e.target.closest('.fbrow')||e.target.closest('.cmtbox'))return; openAngles(t,card,grid); };
+      card.onclick = (e)=>{ if(e.target.closest('.fbrow')||e.target.closest('.cmtbox'))return; openAngles(t,card,grid); };
       grid.appendChild(card);
     });
     area.appendChild(sec);
