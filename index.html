@@ -451,13 +451,19 @@ function renderThemes(){
 }
 
 /* ---------- 担当バッジ/ボタン ---------- */
+function productUrl(theme,angle){ return 'products.html?theme='+encodeURIComponent(theme)+'&angle='+encodeURIComponent(angle||''); }
+async function goProducts(theme,angle){
+  await setClaim('angle',theme,angle,'claimed');   // 対応＝担当マーク＋商品ページへ
+  location.href = productUrl(theme,angle);
+}
 function renderClaimRow(el, kind, theme, angle){
   const key = claimKey(kind,theme,angle);
   const c = CLAIMS[key];
   el.innerHTML='';
   const mkBtn=(txt,cls,fn)=>{const b=document.createElement('button');b.className='cbtn '+cls;b.textContent=txt;b.onclick=(e)=>{e.stopPropagation();fn();};return b;};
   if(!c){
-    el.appendChild(mkBtn(kind==='theme'?'担当する':'対応する','', ()=>setClaim(kind,theme,angle,'claimed')));
+    if(kind==='angle') el.appendChild(mkBtn('対応する','', ()=>goProducts(theme,angle)));
+    else el.appendChild(mkBtn('担当する','', ()=>setClaim(kind,theme,angle,'claimed')));
   } else if(c.user_email===ME.email){
     if(c.status==='claimed'){
       const w=document.createElement('span');w.className='cwho';w.innerHTML=`<span class="ini">${ini(c.user_name)}</span>自分が担当中`;el.appendChild(w);
@@ -472,6 +478,13 @@ function renderClaimRow(el, kind, theme, angle){
     w.innerHTML=`<span class="ini">${c.status==='done'?'✓':ini(c.user_name)}</span>${c.user_name||c.user_email}${c.status==='done'?' 対応済み':' が担当中'}`;
     el.appendChild(w);
     if(ME.role==='管理者') el.appendChild(mkBtn('解除','mini',()=>removeClaim(kind,theme,angle)));
+  }
+  // 切り口には常に「商品を選ぶ →」導線（その切り口専用の商品ページへ）
+  if(kind==='angle'){
+    const a=document.createElement('a'); a.className='cbtn'; a.style.textDecoration='none';
+    a.href=productUrl(theme,angle); a.textContent='商品を選ぶ →';
+    a.onclick=(e)=>e.stopPropagation();
+    el.appendChild(a);
   }
 }
 async function setClaim(kind,theme,angle,status){
