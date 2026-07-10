@@ -215,6 +215,14 @@ const sb = supabase.createClient(SB_URL, SB_KEY);
 
 let ME=null, CATDATE=null, ROWS=[], PV={}, PICKS={}, ROWMAP={}, PRODMAP={}, VIEW='pool', ADOPT_ONLY=false;
 const SEL = new Set();
+const APP_URL = "./";   // テーマ一覧（select-team のトップ）へ戻る
+function parseScope(){
+  const q=new URLSearchParams(location.search);
+  const t=q.get('theme');
+  return t ? {theme:t, angle:q.get('angle')||''} : null;
+}
+let SCOPE = parseScope();               // {theme, angle} or null（切り口を1つに絞る）
+function inScope(o){ return !SCOPE || (o.theme===SCOPE.theme && (o.angle_title||'')===(SCOPE.angle||'')); }
 const $ = id => document.getElementById(id);
 const esc = s => (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);}
@@ -254,8 +262,9 @@ async function load(){
   if(!latest||!latest.length){ $('area').innerHTML=emptyBox('まだ商品がありません。Mac側で product_fetch.py を1回走らせると、ここに候補が並びます。','📦'); return; }
   CATDATE = latest[0].catalog_date;
   $('dateLbl').innerHTML = `カタログ <b>${esc(CATDATE)}</b>`;
-  const {data,error} = await sb.from('v2_product').select('*')
-    .eq('catalog_date',CATDATE).order('theme').order('angle_title').order('rank');
+  let q = sb.from('v2_product').select('*').eq('catalog_date',CATDATE);
+  if(SCOPE){ q = q.eq('theme',SCOPE.theme).eq('angle_title',SCOPE.angle); }
+  const {data,error} = await q.order('theme').order('angle_title').order('rank');
   if(error){ $('area').innerHTML=emptyBox('読み込みエラー：'+esc(error.message)); return; }
   ROWS = data||[];
   PRODMAP = {}; ROWS.forEach(r=> PRODMAP[pk(r.theme,r.angle_title,r.asin)] = r);
@@ -333,29 +342,15 @@ function selectableKeys(items){
   return items.filter(r=>{ const p=PICKS[pk(r.theme,r.angle_title,r.asin)]; return !p || p.status==='差し戻し'; })
               .map(r=>pk(r.theme,r.angle_title,r.asin));
 }
-function renderPool(){
-  const byTheme = {};
-  ROWS.forEach(r=>{
-    if(ADOPT_ONLY && r.verdict!=='採用') return;
-    const th=r.theme, ag=r.angle_title||''; (byTheme[th]=byTheme[th]||{}); (byTheme[th][ag]=byTheme[th][ag]||[]).push(r);
-  });
-  const themes = Object.keys(byTheme);
-  if(!themes.length){ $('area').innerHTML=emptyBox(ADOPT_ONLY?'「採用」の商品がありません。フィルタを外してください。':'この日の商品がありません。','🔍'); return; }
-  let html='';
-  themes.forEach((th,ti)=>{
-    const angles = Object.keys(byTheme[th]);
-    html += `<div class="theme-sec" style="animation-delay:${ti*35}ms"><div class="theme-head"><span class="ic">📦</span>${esc(th)} <span class="thn">切り口 ${angles.length}</span></div>`;
-    angles.forEach(ag=>{
-      const items = byTheme[th][ag];
-      const selk = selectableKeys(items);
-      const allSel = selk.length>0 && selk.every(k=>SEL.has(k));
-      const bulk = selk.length? `<button class="bulk ${allSel?'clear':''}" data-keys="${esc(selk.join('|'))}">${allSel?'選択を解除':'この切り口を全部選ぶ'}</button>`:'';
-      html += `<div class="angle-sec"><div class="angle-head"><span class="pip"></span><span class="at">${esc(ag||'(テーマ単位)')}</span><span class="cnt">${items.length}件</span>${bulk}</div>
-        <div class="pgrid">${items.map(card).join('')}</div></div>`;
-    });
-    html += `</div>`;
-  });
-  $('area').innerHTML = html;
+function angleBlock(items){
+  const selk = selectableKeys(items);
+  const allSel = selk.length>0 && selk.every(k=>SEL.has(k));
+  const bulk = selk.length? `<button class="bulk ${allSel?'clear':''}" data-keys="${esc(selk.join('|'))}">${allSel?'選択を解除':'この切り口を全部選ぶ'}</button>`:'';
+  const at = SCOPE ? '' : `<span class="pip"></span><span class="at">${esc(items[0].angle_title||'(テーマ単位)')}</span>`;
+  const head = (SCOPE && !bulk) ? '' : `<div class="angle-head">${at}${SCOPE?'<span class="pip"></span><span class="at">この切り口の商品</span>':''}<span class="cnt">${items.length}件</span>${bulk}</div>`;
+  return `<div class="angle-sec">${head}<div class="pgrid">${items.map(card).join('')}</div></div>`;
+}
+function bindPool(){
   document.querySelectorAll('.pcard.selectable').forEach(el=>{
     el.onclick=(e)=>{ if(e.target.closest('a,button')) return; const k=el.dataset.k; if(SEL.has(k))SEL.delete(k); else SEL.add(k); render(); };
   });
@@ -364,6 +359,29 @@ function renderPool(){
     const keys=b.dataset.keys.split('|'); const allSel=keys.every(k=>SEL.has(k));
     keys.forEach(k=> allSel?SEL.delete(k):SEL.add(k)); render();
   });
+}
+function renderPool(){
+  const rows = ROWS.filter(r=> !(ADOPT_ONLY && r.verdict!=='採用'));
+  if(SCOPE){
+    if(!rows.length){ $('area').innerHTML=emptyBox(ADOPT_ONLY?'「採用」の商品がありません。':'この切り口の商品はまだ取得されていません。<br>担当バッチで取得されると、ここに並びます。','📦'); return; }
+    $('area').innerHTML = `<div class="theme-sec">${angleBlock(rows)}</div>`;
+    bindPool(); return;
+  }
+  const byTheme = {};
+  rows.forEach(r=>{
+    const th=r.theme, ag=r.angle_title||''; (byTheme[th]=byTheme[th]||{}); (byTheme[th][ag]=byTheme[th][ag]||[]).push(r);
+  });
+  const themes = Object.keys(byTheme);
+  if(!themes.length){ $('area').innerHTML=emptyBox(ADOPT_ONLY?'「採用」の商品がありません。フィルタを外してください。':'この日の商品がありません。','🔍'); return; }
+  let html='';
+  themes.forEach((th,ti)=>{
+    const angles = Object.keys(byTheme[th]);
+    html += `<div class="theme-sec" style="animation-delay:${ti*35}ms"><div class="theme-head"><span class="ic">📦</span>${esc(th)} <span class="thn">切り口 ${angles.length}</span></div>`;
+    angles.forEach(ag=>{ html += angleBlock(byTheme[th][ag]); });
+    html += `</div>`;
+  });
+  $('area').innerHTML = html;
+  bindPool();
 }
 
 /* ---------- 承認待ち / 承認済み ---------- */
@@ -394,7 +412,7 @@ function pickRow(p){
   </div>`;
 }
 function renderList(status){
-  const picks = Object.values(PICKS).filter(p=>p.status===status)
+  const picks = Object.values(PICKS).filter(p=>p.status===status && inScope(p))
     .sort((a,b)=> (b.submitted_at||'').localeCompare(a.submitted_at||''));
   let head='';
   if(status==='承認'){
@@ -414,22 +432,25 @@ function renderList(status){
 function render(){
   ROWMAP = {};
   const themes = new Set(ROWS.map(r=>r.theme));
-  const picks = Object.values(PICKS);
+  const picks = Object.values(PICKS).filter(inScope);
   $('tbPending').textContent = picks.filter(p=>p.status==='申請').length;
   $('tbApproved').textContent = picks.filter(p=>p.status==='承認').length;
   document.querySelectorAll('.tab').forEach(t=> t.classList.toggle('on', t.dataset.v===VIEW));
   $('adoptToggle').style.display = VIEW==='pool'?'inline-flex':'none';
   $('adoptToggle').classList.toggle('on', ADOPT_ONLY);
+  const crumb = SCOPE ? `<a href="${esc(APP_URL)}" style="color:var(--blue-deep);text-decoration:none;font-weight:700">← テーマ一覧</a> <span style="color:var(--faint)">/</span> 📦 ${esc(SCOPE.theme)} <span style="color:var(--faint)">›</span> ${esc(SCOPE.angle||'テーマ単位')}` : '';
   if(VIEW==='pool'){
-    $('viewTitle').textContent='切り口ごとの商品候補';
-    $('lead').innerHTML=`使いたい商品を<b>クリックで選択</b>（右上○→✓）→ 下の「申請する」。テーマ${themes.size}・商品${ROWS.length}`;
+    $('viewTitle').innerHTML = SCOPE ? crumb : '切り口ごとの商品候補';
+    $('lead').innerHTML = SCOPE
+      ? `この切り口に合う商品です。使いたいものを<b>クリックで選択</b>（右上○→✓）→ 下の「申請する」。`
+      : `使いたい商品を<b>クリックで選択</b>（右上○→✓）→ 下の「申請する」。テーマ${themes.size}・商品${ROWS.length}`;
     renderPool();
   }else if(VIEW==='pending'){
-    $('viewTitle').textContent='承認待ち';
+    $('viewTitle').innerHTML = SCOPE ? crumb+' <span style="color:var(--faint)">›</span> 承認待ち' : '承認待ち';
     $('lead').innerHTML= isAdmin()?'申請された商品です。<b>「承認する」で確定</b>、合わなければ「差し戻し」。':'あなたや他の人が申請した商品です。管理者の承認待ちです。';
     renderList('申請');
   }else{
-    $('viewTitle').textContent='承認済み';
+    $('viewTitle').innerHTML = SCOPE ? crumb+' <span style="color:var(--faint)">›</span> 承認済み' : '承認済み';
     $('lead').innerHTML='承認された商品＝実際に使う（クリエイティブを作る）対象です。';
     renderList('承認');
   }
