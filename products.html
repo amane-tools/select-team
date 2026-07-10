@@ -286,8 +286,10 @@ function verdictBadge(v){
   return '<span class="badge hold">保留</span>';
 }
 function srcChips(sources){
-  if(!sources||!sources.length) return '';
-  return '<span class="srcs">'+sources.map(s=>`<span class="schip">${esc(SRC_LABEL[s]||s)}</span>`).join('')+'</span>';
+  const arr = Array.isArray(sources) ? sources
+    : (sources ? String(sources).split('/').filter(Boolean) : []);
+  if(!arr.length) return '';
+  return '<span class="srcs">'+arr.map(s=>`<span class="schip">${esc(SRC_LABEL[s]||s)}</span>`).join('')+'</span>';
 }
 function aiBlock(score,reason){
   if(score==null) return reason?`<div class="aireason">${esc(reason)}</div>`:'';
