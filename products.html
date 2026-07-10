@@ -50,21 +50,25 @@
 
   .pgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
   @media(max-width:720px){.pgrid{grid-template-columns:1fr}}
-  .pcard{display:flex;gap:12px;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--panel);box-shadow:var(--shadow);opacity:0;animation:rise .3s forwards;position:relative}
-  .pcard.picked{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue),var(--shadow)}
+  .pcard{display:flex;gap:12px;border:2px solid var(--line);border-radius:12px;padding:12px;background:var(--panel);box-shadow:var(--shadow);opacity:0;animation:rise .3s forwards;position:relative;transition:border-color .12s,background .12s}
+  .pcard.selectable{cursor:pointer}
+  .pcard.selectable:hover{border-color:#cfe0fb}
+  .pcard.picked{border-color:var(--blue);background:var(--blue-soft)}
   .pcard.approved{border-color:var(--green-line);background:#f7fcf9}
   .pcard .thumb{width:74px;height:74px;flex-shrink:0;border-radius:9px;border:1px solid var(--line);background:#fbfcfe center/contain no-repeat;overflow:hidden}
   .pcard .thumb img{width:100%;height:100%;object-fit:contain}
   .pcard .body{flex:1;min-width:0;display:flex;flex-direction:column}
-  .ptop{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:2px}
-  .selbox{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--blue-deep);cursor:pointer;user-select:none}
-  .selbox input{width:15px;height:15px;accent-color:var(--blue);cursor:pointer}
+  /* 選択の丸チェック（案A） */
+  .selcorner{position:absolute;top:10px;right:10px;width:27px;height:27px;border-radius:50%;border:1.5px solid var(--ink-faint);background:#fff;display:flex;align-items:center;justify-content:center;color:transparent;font-size:15px;font-weight:800;line-height:1}
+  .pcard.selectable:hover .selcorner{border-color:var(--blue)}
+  .selcorner.on{background:var(--blue);border-color:var(--blue);color:#fff}
+  .pcorner{position:absolute;top:10px;right:10px;font-size:9.5px;font-weight:700;padding:3px 10px;border-radius:100px}
+  .pcorner.applied{background:var(--amber-soft);color:var(--amber)}
+  .pcorner.approved{background:var(--green-soft);color:var(--green)}
+  .ptop{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:2px;padding-right:32px}
   .pcard .rank{font-size:10px;font-weight:700;color:var(--ink-faint)}
-  .pst{font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:100px;margin-left:auto}
-  .pst.applied{background:var(--amber-soft);color:var(--amber)}
-  .pst.approved{background:var(--green-soft);color:var(--green)}
-  .pst.rejected{background:var(--red-soft);color:var(--red)}
-  .pcard .ptitle{font-size:13px;font-weight:700;line-height:1.35;color:var(--ink);text-decoration:none;display:block;margin:1px 0 5px}
+  .pst.rejected{font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:100px;background:var(--red-soft);color:var(--red)}
+  .pcard .ptitle{font-size:13px;font-weight:700;line-height:1.35;color:var(--ink);text-decoration:none;display:block;margin:1px 0 5px;padding-right:32px}
   .pcard .ptitle:hover{color:var(--blue-deep);text-decoration:underline}
   .pcard .meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:11px;color:var(--ink-soft)}
   .pcard .price{font-size:14px;font-weight:700;color:var(--ink)}
@@ -130,7 +134,7 @@
     <span id="userChip" class="userchip"></span>
   </div>
   <h1>切り口ごとの商品候補</h1>
-  <p class="lead">係②が集めた候補です。使いたい商品に <b>チェック</b> を付けて下の「申請する」で送信 → 管理者が承認します。👍👎は軽い印象メモ（⑤の学習に使います）。</p>
+  <p class="lead">使いたい商品を <b>カードごとクリックして選択</b>（右上の○が✓に）→ 下の「申請する」で送信 → 管理者が承認します。👍👎は軽い印象メモ（⑤の学習に使います）。</p>
   <div class="controls">
     <button class="reload" id="reloadBtn">↻ 再読み込み</button>
     <div class="counter">
@@ -232,36 +236,37 @@ function card(r){
   ROWMAP[key] = r;
   const pv = PV[key]||{up:0,down:0,mine:0};
   const pick = PICKS[key];
+  const status = pick ? pick.status : null;
+  const selectable = !pick || status==='差し戻し';
+  const on = SEL.has(key);
   const img = r.image_url ? `<img src="${esc(r.image_url)}" loading="lazy" alt="">` : '';
   const src = r.consensus ? `<span class="badge src">${r.consensus}源一致${r.sources?'('+esc(r.sources)+')':''}</span>` : '';
   const ai  = (r.ai_score!=null) ? `<span class="badge ai">AI適合 ${r.ai_score}</span>` : '';
   const rev = (r.review_count!=null) ? `<span class="badge rev">レビュー ${Number(r.review_count).toLocaleString()}</span>` : '';
   const reason = r.ai_reason ? `<div class="aireason"><span class="rz">AI</span><span>${esc(r.ai_reason)}</span></div>` : '';
 
-  // 選択チェック（承認済みは不可）
-  const canSelect = !(pick && pick.status==='承認');
-  const selbox = canSelect
-    ? `<label class="selbox"><input type="checkbox" class="selchk" data-k="${key}" ${SEL.has(key)?'checked':''}> 選ぶ</label>`
-    : '';
-  // ステータス表示
-  let st='';
-  if(pick){
-    if(pick.status==='申請') st=`<span class="pst applied">申請中・${esc(pick.submitted_name||'')}</span>`;
-    else if(pick.status==='承認') st=`<span class="pst approved">✓ 承認済・${esc(pick.decided_name||'')}</span>`;
-    else if(pick.status==='差し戻し') st=`<span class="pst rejected">差し戻し</span>`;
-  }
+  // 右上コーナー：申請中/承認済はステータス、それ以外は選択の丸チェック
+  let corner='';
+  if(status==='申請') corner = `<span class="pcorner applied">申請中・${esc(pick.submitted_name||'')}</span>`;
+  else if(status==='承認') corner = `<span class="pcorner approved">✓ 承認済・${esc(pick.decided_name||'')}</span>`;
+  else if(selectable) corner = `<div class="selcorner ${on?'on':''}">✓</div>`;
+
+  // 上段：ランク（＋差し戻し）
+  let ptop = `<span class="rank">#${r.rank??'-'}</span>`;
+  if(status==='差し戻し') ptop += `<span class="pst rejected">差し戻し</span>`;
+
   // 承認操作（管理者・申請中のみ）＋申請取消（本人/管理者・承認前）
   let ops='';
-  if(pick && pick.status==='申請' && isAdmin())
+  if(status==='申請' && isAdmin())
     ops += `<button class="dbtn ok" data-k="${key}" data-s="承認">承認</button><button class="dbtn ng" data-k="${key}" data-s="差し戻し">差し戻し</button>`;
-  if(pick && pick.status!=='承認' && (pick.submitted_by===ME.email || isAdmin()))
+  if(pick && status!=='承認' && (pick.submitted_by===ME.email || isAdmin()))
     ops += `<button class="dbtn wd" data-k="${key}">申請取消</button>`;
 
-  const cls = 'pcard'+(pick&&pick.status==='承認'?' approved':'')+((SEL.has(key)||(pick&&pick.status==='申請'))?' picked':'');
-  return `<div class="${cls}">
+  const cls = 'pcard'+(selectable?' selectable':'')+(status==='承認'?' approved':'')+((on||status==='申請')?' picked':'');
+  return `<div class="${cls}" data-k="${key}">
     <div class="thumb">${img}</div>
     <div class="body">
-      <div class="ptop">${selbox}<span class="rank">#${r.rank??'-'}</span>${st}</div>
+      <div class="ptop">${ptop}</div>
       <a class="ptitle" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.title||'(無題)')}</a>
       <div class="meta">
         <span class="price">${yen(r.price)}</span>
@@ -275,6 +280,7 @@ function card(r){
         <span class="fbright">${ops}</span>
       </div>
     </div>
+    ${corner}
   </div>`;
 }
 function render(){
@@ -306,10 +312,14 @@ function render(){
   $('cItems').textContent  = ROWS.length;
   $('cApplied').textContent  = picks.filter(p=>p.status==='申請').length;
   $('cApproved').textContent = picks.filter(p=>p.status==='承認').length;
-  // イベント
-  document.querySelectorAll('.selchk').forEach(c=>{
-    c.onchange = ()=>{ const k=c.dataset.k; if(c.checked)SEL.add(k); else SEL.delete(k);
-      c.closest('.pcard').classList.toggle('picked', c.checked || (PICKS[k]&&PICKS[k].status==='申請')); updateBar(); };
+  // イベント：カードごとクリックで選択（リンク/ボタンは除外）
+  document.querySelectorAll('.pcard.selectable').forEach(cardEl=>{
+    cardEl.onclick = (e)=>{
+      if(e.target.closest('a,button')) return;
+      const k = cardEl.dataset.k;
+      if(SEL.has(k)) SEL.delete(k); else SEL.add(k);
+      render();
+    };
   });
   document.querySelectorAll('.vbtn').forEach(b=> b.onclick = ()=> vote(b.dataset.t,b.dataset.g,b.dataset.a,Number(b.dataset.v)));
   document.querySelectorAll('.dbtn.ok,.dbtn.ng').forEach(b=> b.onclick = ()=> decide(b.dataset.k,b.dataset.s));
