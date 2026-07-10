@@ -7,123 +7,155 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Ccircle%20cx='16'%20cy='16'%20r='16'%20fill='%231a2236'/%3E%3Ctext%20x='14.5'%20y='21'%20text-anchor='middle'%20font-family='Arial'%20font-size='17'%20font-weight='bold'%20fill='%23fff'%3ES%3C/text%3E%3Ccircle%20cx='23.5'%20cy='19'%20r='2.3'%20fill='%233b6fe0'/%3E%3C/svg%3E">
 <style>
   :root{
-    --bg:#f5f7fb;--panel:#fff;--ink:#1a2236;--ink-soft:#5b6577;--ink-faint:#98a1b3;
-    --line:#e4e9f2;--blue:#3b6fe0;--blue-soft:#eaf0fd;--blue-deep:#2a55b8;
-    --green:#1f9d6b;--green-soft:#e6f6ee;--green-line:#c7e8d6;
+    --bg:#f4f6fa;--panel:#fff;--ink:#1a2236;--soft:#5b6577;--faint:#98a1b3;
+    --line:#e7ebf3;--line2:#eef1f7;--blue:#3b6fe0;--blue-soft:#eaf0fd;--blue-deep:#2a55b8;
+    --green:#1f9d6b;--green-soft:#e7f6ef;--green-line:#c7e8d6;
     --amber:#c9871f;--amber-soft:#fbf2dd;--red:#d24a52;--red-soft:#fbe9ea;
     --purple:#7b5bd6;--purple-soft:#efeafb;--teal:#0f9c8f;--teal-soft:#e2f5f3;
-    --gray2:#8a92a3;--gray-soft:#f0f2f6;--gold:#d9a441;--gold-soft:#faf3e0;
-    --shadow:0 1px 2px rgba(26,34,54,.04),0 8px 24px rgba(26,34,54,.06);--radius:14px;
+    --gray-soft:#f1f3f8;--gold:#d9a441;
+    --shadow:0 1px 2px rgba(26,34,54,.04),0 6px 20px rgba(26,34,54,.06);
+    --shadow2:0 2px 6px rgba(26,34,54,.06),0 16px 40px rgba(26,34,54,.10);
   }
   *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
   body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Segoe UI",sans-serif;
-    background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;padding:26px 18px 96px}
-  .wrap{max-width:1060px;margin:0 auto}
-  .topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-  .brand{display:inline-flex;align-items:baseline;gap:2px;font-size:20px;font-weight:700;letter-spacing:-.02em}
-  .brand .dot{color:var(--blue)}
+    background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;padding:0 0 110px}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 18px}
+
+  /* ===== ヘッダ ===== */
+  .head{position:sticky;top:0;z-index:20;background:rgba(244,246,250,.82);backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line);padding:12px 0}
+  .head .row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
   .logomark{width:30px;height:30px;border-radius:50%;background:var(--ink);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:700;flex-shrink:0}
   .logomark .d{color:var(--blue)}
-  .date{font-size:12px;color:var(--ink-soft);font-weight:600;background:var(--panel);border:1px solid var(--line);border-radius:100px;padding:4px 11px;white-space:nowrap}.date b{color:var(--ink)}
-  .userchip{margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink-soft)}
+  .brand{font-size:18px;font-weight:700;letter-spacing:-.02em}.brand .dot{color:var(--blue)}
+  .date{font-size:12px;color:var(--soft);font-weight:600;background:var(--panel);border:1px solid var(--line);border-radius:100px;padding:4px 11px;white-space:nowrap}.date b{color:var(--ink)}
+  .userchip{margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--soft)}
   .rolebadge{font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:100px}
   .rolebadge.admin{background:var(--purple-soft);color:var(--purple)} .rolebadge.worker{background:var(--blue-soft);color:var(--blue-deep)}
-  .userchip button{background:var(--gray-soft);border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;color:var(--ink-soft)}
-  h1{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-top:6px}
-  .lead{color:var(--ink-soft);margin-top:6px;max-width:760px;font-size:14px}
-  .controls{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin:16px 0 10px}
-  .tabs{display:inline-flex;gap:4px;background:var(--gray-soft);border:1px solid var(--line);border-radius:12px;padding:4px}
-  .tab{border:none;background:transparent;font-size:13px;font-weight:700;color:var(--ink-soft);padding:8px 15px;border-radius:9px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+  .userchip button{background:var(--gray-soft);border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;color:var(--soft)}
+  .userchip button:hover{background:#e8ebf2}
+
+  .subhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}
+  .tabs{display:inline-flex;gap:3px;background:var(--gray-soft);border:1px solid var(--line);border-radius:12px;padding:4px}
+  .tab{border:none;background:transparent;font-size:13px;font-weight:700;color:var(--soft);padding:8px 15px;border-radius:9px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:.12s}
+  .tab:hover{color:var(--ink)}
   .tab.on{background:#fff;color:var(--ink);box-shadow:var(--shadow)}
-  .tab .tb{font-size:11px;font-weight:700;padding:1px 7px;border-radius:100px;background:var(--gray-soft);color:var(--ink-soft)}
-  .tab.on .tb{background:var(--gray-soft)}
-  .tab[data-v="pending"] .tb{background:var(--amber-soft);color:var(--amber)}
-  .tab[data-v="approved"] .tb{background:var(--green-soft);color:var(--green)}
-  button.reload{background:var(--blue-soft);color:var(--blue-deep);border:1px solid #cfe0fb;font-size:13px;font-weight:600;padding:9px 16px;border-radius:10px;cursor:pointer}
-  button.reload:hover{background:#dfeafd}
-  .counter{margin-left:auto;display:inline-flex;gap:8px;flex-wrap:wrap}
-  .cpill{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:6px 12px;font-size:12px;color:var(--ink-soft);white-space:nowrap}
-  .cpill b{color:var(--ink);font-size:15px;font-weight:700;margin-left:3px}
+  .tab .tb{font-size:11px;font-weight:700;padding:1px 7px;border-radius:100px;background:#dfe4ee;color:var(--soft);min-width:18px;text-align:center}
+  .tab[data-v="pending"].on .tb{background:var(--amber-soft);color:var(--amber)}
+  .tab[data-v="approved"].on .tb{background:var(--green-soft);color:var(--green)}
+  .tools{margin-left:auto;display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .toggle{font-size:12px;font-weight:600;color:var(--soft);background:var(--panel);border:1px solid var(--line);border-radius:100px;padding:7px 13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+  .toggle .dot{width:8px;height:8px;border-radius:50%;background:#cfd6e2}
+  .toggle.on{color:var(--blue-deep);border-color:#cfe0fb;background:var(--blue-soft)} .toggle.on .dot{background:var(--blue)}
+  .rl{background:var(--panel);color:var(--soft);border:1px solid var(--line);border-radius:100px;padding:7px 13px;font-size:12px;font-weight:600;cursor:pointer}
+  .rl:hover{background:#f6f8fc}
 
-  .theme-sec{margin:18px 0 8px;opacity:0;animation:rise .4s forwards}
+  h1{font-size:15px;font-weight:700;margin:16px 0 2px;color:var(--soft)}
+  .lead{color:var(--faint);font-size:12.5px;margin-bottom:4px}
+
+  /* ===== テーマ / 切り口 ===== */
+  .theme-sec{margin:20px 0 6px;opacity:0;animation:rise .4s forwards}
   @keyframes rise{to{opacity:1;transform:none}}
-  .theme-head{display:flex;align-items:center;gap:9px;font-size:16px;font-weight:700;letter-spacing:-.01em;margin-bottom:2px}
-  .theme-head .thn{font-size:11px;font-weight:600;color:var(--ink-faint)}
-  .angle-sec{margin:14px 0 6px}
-  .angle-head{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--ink-soft);margin:0 0 10px;flex-wrap:wrap}
-  .angle-head .pip{width:7px;height:7px;border-radius:2px;background:var(--blue)}
-  .angle-head .cnt{font-size:11px;font-weight:600;color:var(--ink-faint)}
+  .theme-head{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:700;letter-spacing:-.01em;margin-bottom:2px}
+  .theme-head .ic{width:24px;height:24px;border-radius:7px;background:var(--ink);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+  .theme-head .thn{font-size:11px;font-weight:600;color:var(--faint)}
+  .angle-sec{margin:12px 0 4px}
+  .angle-head{display:flex;align-items:center;gap:9px;margin:0 0 9px;flex-wrap:wrap}
+  .angle-head .pip{width:6px;height:16px;border-radius:3px;background:var(--blue)}
+  .angle-head .at{font-size:13.5px;font-weight:700;color:var(--ink)}
+  .angle-head .cnt{font-size:11px;font-weight:600;color:var(--faint)}
+  .bulk{margin-left:auto;font-size:11.5px;font-weight:700;color:var(--blue-deep);background:var(--blue-soft);border:1px solid #cfe0fb;border-radius:100px;padding:5px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+  .bulk:hover{background:#dfeafd} .bulk.clear{color:var(--soft);background:var(--gray-soft);border-color:var(--line)}
 
-  .pgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-  @media(max-width:720px){.pgrid{grid-template-columns:1fr}}
-  .pcard{display:flex;gap:12px;border:2px solid var(--line);border-radius:12px;padding:12px;background:var(--panel);box-shadow:var(--shadow);opacity:0;animation:rise .3s forwards;position:relative;transition:border-color .12s,background .12s}
+  .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+  .pcard{position:relative;display:flex;gap:12px;border:1.5px solid var(--line);border-radius:14px;padding:13px;background:var(--panel);box-shadow:var(--shadow);opacity:0;animation:rise .3s forwards;transition:border-color .12s,box-shadow .15s,background .12s}
   .pcard.selectable{cursor:pointer}
-  .pcard.selectable:hover{border-color:#cfe0fb}
+  .pcard.selectable:hover{box-shadow:var(--shadow2);border-color:#d4ddec}
   .pcard.picked{border-color:var(--blue);background:var(--blue-soft)}
-  .pcard.approved{border-color:var(--green-line);background:#f7fcf9}
-  .pcard .thumb{width:74px;height:74px;flex-shrink:0;border-radius:9px;border:1px solid var(--line);background:#fbfcfe center/contain no-repeat;overflow:hidden}
-  .pcard .thumb img{width:100%;height:100%;object-fit:contain}
-  .pcard .body{flex:1;min-width:0;display:flex;flex-direction:column}
-  .selcorner{position:absolute;top:10px;right:10px;width:27px;height:27px;border-radius:50%;border:1.5px solid var(--ink-faint);background:#fff;display:flex;align-items:center;justify-content:center;color:transparent;font-size:15px;font-weight:800;line-height:1}
-  .pcard.selectable:hover .selcorner{border-color:var(--blue)}
-  .selcorner.on{background:var(--blue);border-color:var(--blue);color:#fff}
-  .pcorner{position:absolute;top:10px;right:10px;font-size:9.5px;font-weight:700;padding:3px 10px;border-radius:100px}
-  .pcorner.applied{background:var(--amber-soft);color:var(--amber)}
-  .pcorner.approved{background:var(--green-soft);color:var(--green)}
-  .ptop{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:2px;padding-right:32px}
-  .pcard .rank{font-size:10px;font-weight:700;color:var(--ink-faint)}
-  .pst.rejected{font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:100px;background:var(--red-soft);color:var(--red)}
-  .pcard .ptitle{font-size:13px;font-weight:700;line-height:1.35;color:var(--ink);text-decoration:none;display:block;margin:1px 0 5px;padding-right:32px}
-  .pcard .ptitle:hover{color:var(--blue-deep);text-decoration:underline}
-  .pcard .meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:11px;color:var(--ink-soft)}
-  .pcard .price{font-size:14px;font-weight:700;color:var(--ink)}
-  .pcard .brand{font-weight:600}
-  .badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:100px;white-space:nowrap}
+  .pcard.approved{border-color:var(--green-line);background:#f6fcf9}
+  .thumb{width:82px;height:82px;flex-shrink:0;border-radius:11px;border:1px solid var(--line);background:#fbfcfe center/contain no-repeat;overflow:hidden;display:flex;align-items:center;justify-content:center;color:#c7cede}
+  .thumb img{width:100%;height:100%;object-fit:contain}
+  .body{flex:1;min-width:0;display:flex;flex-direction:column}
+  .ptop{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:3px;padding-right:34px}
+  .rank{font-size:10.5px;font-weight:800;color:#fff;background:var(--faint);border-radius:6px;padding:1px 6px;letter-spacing:.02em}
+  .pcard.picked .rank{background:var(--blue)}
+  .badge{font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:100px;white-space:nowrap}
   .badge.adopt{background:var(--green-soft);color:var(--green)}
   .badge.check{background:var(--amber-soft);color:var(--amber)}
-  .badge.hold{background:var(--gray-soft);color:var(--ink-soft)}
-  .badge.src{background:var(--teal-soft);color:var(--teal)}
-  .badge.ai{background:var(--purple-soft);color:var(--purple)}
-  .badge.rev{background:var(--blue-soft);color:var(--blue-deep)}
-  .aireason{font-size:11px;color:var(--ink-faint);margin-top:6px;line-height:1.45;display:flex;gap:5px}
-  .aireason .rz{color:var(--purple);font-weight:700;flex-shrink:0}
-  .who{font-size:10.5px;color:var(--ink-soft);margin-top:6px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-  .who .ini{width:16px;height:16px;border-radius:50%;background:var(--blue);color:#fff;font-size:9px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
-  .who .dt{color:var(--ink-faint)}
-  .fbrow{display:flex;align-items:center;gap:6px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);flex-wrap:wrap}
-  .vbtn{font-size:12px;font-weight:700;padding:4px 11px;border-radius:100px;border:1px solid var(--line);background:#fff;color:var(--ink-soft);cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:5px}
-  .vbtn:hover{border-color:var(--ink-faint)}
+  .badge.hold{background:var(--gray-soft);color:var(--soft)}
+  .srcs{display:inline-flex;gap:4px;align-items:center}
+  .schip{font-size:9px;font-weight:700;padding:1px 6px;border-radius:5px;background:var(--teal-soft);color:var(--teal)}
+  .ptitle{font-size:13.5px;font-weight:700;line-height:1.36;color:var(--ink);text-decoration:none;display:block;margin:1px 0 6px;padding-right:6px}
+  .ptitle:hover{color:var(--blue-deep);text-decoration:underline}
+  .price{font-size:16px;font-weight:800;letter-spacing:-.01em}
+  .brand{font-size:11.5px;color:var(--soft);font-weight:600;margin-left:7px}
+  .rev{font-size:10.5px;color:var(--faint);margin-left:7px}
+  .aiwrap{display:flex;align-items:center;gap:8px;margin-top:8px}
+  .aibar{flex:1;height:6px;border-radius:100px;background:#edf0f6;overflow:hidden;max-width:150px}
+  .aifill{height:100%;border-radius:100px}
+  .aiscore{font-size:10.5px;font-weight:800;white-space:nowrap}
+  .aireason{font-size:11px;color:var(--faint);margin-top:5px;line-height:1.45}
+  .selcorner{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;border:2px solid #cfd6e2;background:#fff;display:flex;align-items:center;justify-content:center;color:transparent;font-size:15px;font-weight:800;line-height:1;transition:.12s}
+  .pcard.selectable:hover .selcorner{border-color:var(--blue)}
+  .selcorner.on{background:var(--blue);border-color:var(--blue);color:#fff}
+  .pcorner{position:absolute;top:12px;right:12px;font-size:9.5px;font-weight:700;padding:3px 10px;border-radius:100px;display:inline-flex;align-items:center;gap:4px}
+  .pcorner.applied{background:var(--amber-soft);color:var(--amber)}
+  .pcorner.approved{background:var(--green-soft);color:var(--green)}
+  .pst.rejected{font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:100px;background:var(--red-soft);color:var(--red)}
+
+  .fbrow{display:flex;align-items:center;gap:6px;margin-top:9px;padding-top:9px;border-top:1px solid var(--line2);flex-wrap:wrap}
+  .vbtn{font-size:12px;font-weight:700;padding:5px 11px;border-radius:100px;border:1px solid var(--line);background:#fff;color:var(--soft);cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:5px}
+  .vbtn:hover{border-color:var(--faint)}
   .vbtn.up.on{background:var(--green-soft);color:var(--green);border-color:var(--green-line)}
   .vbtn.down.on{background:var(--red-soft);color:var(--red);border-color:#f2c9cc}
   .vbtn .vn{font-size:10px;opacity:.75}
-  .dbtn{font-size:11.5px;font-weight:700;padding:5px 13px;border-radius:100px;border:1px solid var(--line);background:#fff;cursor:pointer}
+  .dbtn{font-size:11.5px;font-weight:700;padding:6px 13px;border-radius:100px;border:1px solid var(--line);background:#fff;cursor:pointer}
   .dbtn.ok{background:var(--green);color:#fff;border-color:var(--green)}
-  .dbtn.ng{background:#fff;color:var(--red);border-color:#f2c9cc}
-  .dbtn.wd{background:var(--gray-soft);color:var(--ink-soft)}
+  .dbtn.ok:hover{background:#1a875c}
+  .dbtn.ng{background:#fff;color:var(--red);border-color:#f2c9cc} .dbtn.ng:hover{background:var(--red-soft)}
+  .dbtn.wd{background:var(--gray-soft);color:var(--soft)}
   .fbright{margin-left:auto;display:inline-flex;gap:6px}
+  .who{font-size:10.5px;color:var(--soft);margin-top:7px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .ini{width:17px;height:17px;border-radius:50%;background:var(--blue);color:#fff;font-size:9px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  .who .dt{color:var(--faint)}
+  .who .arw{color:var(--faint)}
 
-  .summary{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 15px;margin:4px 0 14px;box-shadow:var(--shadow)}
-  .summary .sh{font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:8px}
-  .summary .chips{display:flex;gap:8px;flex-wrap:wrap}
-  .pchip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--ink-soft);background:var(--gray-soft);border:1px solid var(--line);border-radius:100px;padding:4px 12px}
-  .pchip .ini{width:17px;height:17px;border-radius:50%;background:var(--green);color:#fff;font-size:9px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
-  .pchip b{color:var(--ink);font-size:14px}
+  /* サマリ（担当者別） */
+  .summary{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:6px 0 16px;box-shadow:var(--shadow)}
+  .summary .sh{font-size:12px;font-weight:700;color:var(--soft);margin-bottom:10px;display:flex;align-items:center;gap:7px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .pchip{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--soft);background:var(--gray-soft);border:1px solid var(--line);border-radius:100px;padding:5px 13px 5px 5px}
+  .pchip .ini{width:19px;height:19px;background:var(--green)}
+  .pchip b{color:var(--ink);font-size:15px;margin-left:1px}
 
-  .empty{color:var(--ink-faint);font-size:14px;text-align:center;padding:44px 0;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
-  .submitbar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);box-shadow:0 -4px 16px rgba(26,34,54,.10);padding:11px 18px;display:none;align-items:center;gap:12px;z-index:40}
+  .empty{color:var(--faint);font-size:14px;text-align:center;padding:48px 20px;background:var(--panel);border:1px dashed var(--line);border-radius:14px}
+  .empty .ei{font-size:30px;margin-bottom:8px;opacity:.5}
+  .skel{height:112px;border-radius:14px;background:linear-gradient(100deg,#eef1f7 30%,#f6f8fc 50%,#eef1f7 70%);background-size:200% 100%;animation:sh 1.2s infinite}
+  @keyframes sh{to{background-position:-200% 0}}
+
+  /* 申請バー */
+  .submitbar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#fff;border-top:1px solid var(--line);box-shadow:0 -6px 22px rgba(26,34,54,.12);padding:12px 18px;display:none;align-items:center;gap:12px}
   .submitbar.show{display:flex}
-  .submitbar .cnt{font-size:14px;font-weight:700}.submitbar .cnt b{color:var(--blue)}
-  .submitbar .go{margin-left:auto;background:var(--blue);color:#fff;border:none;border-radius:10px;padding:11px 26px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(59,111,224,.28)}
-  .submitbar .clr{background:var(--gray-soft);border:1px solid var(--line);border-radius:10px;padding:11px 16px;font-size:13px;cursor:pointer;color:var(--ink-soft)}
-  .gate{max-width:440px;margin:12vh auto 0;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:34px 30px;box-shadow:var(--shadow);text-align:center}
-  .gate .lg{width:52px;height:52px;border-radius:50%;background:var(--ink);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;margin-bottom:14px}
-  .gate h2{font-size:18px;margin-bottom:6px}
-  .gate p{font-size:13px;color:var(--ink-soft);margin-bottom:18px}
-  .gate button{background:var(--blue);color:#fff;border:none;font-size:14px;font-weight:600;padding:12px 24px;border-radius:10px;cursor:pointer;box-shadow:0 2px 8px rgba(59,111,224,.28)}
-  .gate .err{font-size:12px;color:var(--red);background:var(--red-soft);border:1px solid #f2c9cc;border-radius:9px;padding:9px 12px;margin-top:14px}
+  .submitbar .inner{max-width:1120px;margin:0 auto;display:flex;align-items:center;gap:12px;width:100%}
+  .submitbar .cnt{font-size:14px;font-weight:700}.submitbar .cnt b{color:var(--blue);font-size:18px}
+  .submitbar .go{margin-left:auto;background:var(--blue);color:#fff;border:none;border-radius:11px;padding:12px 28px;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(59,111,224,.32)}
+  .submitbar .go:hover{background:var(--blue-deep)}
+  .submitbar .clr{background:var(--gray-soft);border:1px solid var(--line);border-radius:11px;padding:12px 16px;font-size:13px;cursor:pointer;color:var(--soft)}
+
+  /* ゲート */
+  .gate{max-width:430px;margin:14vh auto 0;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:36px 30px;box-shadow:var(--shadow2);text-align:center}
+  .gate .lg{width:54px;height:54px;border-radius:50%;background:var(--ink);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:25px;font-weight:700;margin-bottom:14px}
+  .gate h2{font-size:19px;margin-bottom:6px}
+  .gate p{font-size:13px;color:var(--soft);margin-bottom:20px}
+  .gate button{background:var(--blue);color:#fff;border:none;font-size:14px;font-weight:700;padding:13px 26px;border-radius:11px;cursor:pointer;box-shadow:0 4px 14px rgba(59,111,224,.3)}
+  .gate .err{font-size:12px;color:var(--red);background:var(--red-soft);border:1px solid #f2c9cc;border-radius:10px;padding:10px 12px;margin-top:16px}
   .hidden{display:none!important}
-  #toast{position:fixed;left:50%;bottom:76px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;font-size:13px;font-weight:600;padding:11px 20px;border-radius:100px;opacity:0;transition:.25s;pointer-events:none;z-index:50}
+  #toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;font-size:13px;font-weight:600;padding:12px 22px;border-radius:100px;opacity:0;transition:.25s;pointer-events:none;z-index:60;box-shadow:var(--shadow2)}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  @media(max-width:520px){
+    .thumb{width:66px;height:66px} .pgrid{grid-template-columns:1fr}
+    .submitbar .go{padding:12px 20px}
+  }
 </style>
 </head>
 <body>
@@ -137,34 +169,42 @@
   <div id="gateErr" class="err hidden"></div>
 </div>
 
-<div id="app" class="wrap hidden">
-  <div class="topbar">
-    <span class="logomark">S<span class="d">.</span></span>
-    <span class="brand">Select<span class="dot">.</span> 商品ビュー</span>
-    <span id="dateLbl" class="date">—</span>
-    <span id="userChip" class="userchip"></span>
-  </div>
-  <h1>切り口ごとの商品候補</h1>
-  <p class="lead" id="lead">使いたい商品を <b>カードごとクリックして選択</b>（右上の○が✓に）→ 下の「申請する」で送信。管理者は「承認待ち」で承認します。</p>
-  <div class="controls">
-    <div class="tabs">
-      <button class="tab on" data-v="pool">候補を選ぶ</button>
-      <button class="tab" data-v="pending">承認待ち <span class="tb" id="tbPending">0</span></button>
-      <button class="tab" data-v="approved">承認済み <span class="tb" id="tbApproved">0</span></button>
+<div id="app" class="hidden">
+  <div class="head">
+    <div class="wrap">
+      <div class="row">
+        <span class="logomark">S<span class="d">.</span></span>
+        <span class="brand">Select<span class="dot">.</span> 商品ビュー</span>
+        <span id="dateLbl" class="date">—</span>
+        <span id="userChip" class="userchip"></span>
+      </div>
+      <div class="subhead">
+        <div class="tabs">
+          <button class="tab on" data-v="pool">候補を選ぶ</button>
+          <button class="tab" data-v="pending">承認待ち <span class="tb" id="tbPending">0</span></button>
+          <button class="tab" data-v="approved">承認済み <span class="tb" id="tbApproved">0</span></button>
+        </div>
+        <div class="tools">
+          <button class="toggle" id="adoptToggle"><span class="dot"></span>採用のみ</button>
+          <button class="rl" id="reloadBtn">↻ 更新</button>
+        </div>
+      </div>
     </div>
-    <button class="reload" id="reloadBtn" style="margin-left:auto">↻ 再読み込み</button>
-    <div class="counter">
-      <span class="cpill">テーマ<b id="cThemes">0</b></span>
-      <span class="cpill">商品<b id="cItems">0</b></span>
-    </div>
   </div>
-  <div id="area"><div class="empty">読み込み中…</div></div>
+
+  <div class="wrap">
+    <h1 id="viewTitle">切り口ごとの商品候補</h1>
+    <div class="lead" id="lead"></div>
+    <div id="area"></div>
+  </div>
 </div>
 
 <div id="submitbar" class="submitbar">
-  <span class="cnt"><b id="selCnt">0</b> 件を選択中</span>
-  <button class="clr" id="clrBtn">選択をクリア</button>
-  <button class="go" id="goBtn">申請する →</button>
+  <div class="inner">
+    <span class="cnt"><b id="selCnt">0</b> 件を選択中</span>
+    <button class="clr" id="clrBtn">クリア</button>
+    <button class="go" id="goBtn">申請する →</button>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -173,7 +213,7 @@ const SB_URL = "https://jvnyavatcwxuljjujxua.supabase.co";
 const SB_KEY = "sb_publishable_hbtP3WrNCJp0BUuBrDs4Ww_6x79K4uc";
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
-let ME=null, CATDATE=null, ROWS=[], PV={}, PICKS={}, ROWMAP={}, PRODMAP={}, VIEW='pool';
+let ME=null, CATDATE=null, ROWS=[], PV={}, PICKS={}, ROWMAP={}, PRODMAP={}, VIEW='pool', ADOPT_ONLY=false;
 const SEL = new Set();
 const $ = id => document.getElementById(id);
 const esc = s => (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -183,6 +223,7 @@ function pk(t,a,asin){return t+'::'+(a||'')+'::'+asin;}
 function isAdmin(){return ME && ME.role==='管理者';}
 function ini(s){return (s||'?').trim().charAt(0);}
 function fmtDate(s){ if(!s) return ''; try{ return new Date(s).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}); }catch(e){ return ''; } }
+const SRC_LABEL={amazon:'Amazon',rakuten:'楽天',yahoo:'Yahoo'};
 
 $('loginBtn').onclick = ()=> sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.href.split('#')[0]}});
 sb.auth.onAuthStateChange((_e)=>{ if(_e==='SIGNED_IN') boot(); });
@@ -207,15 +248,15 @@ function showGate(msg){
 }
 
 async function load(){
-  $('area').innerHTML = '<div class="empty">読み込み中…</div>';
+  $('area').innerHTML = '<div class="pgrid">'+Array(4).fill('<div class="skel"></div>').join('')+'</div>';
   const {data:latest,error:e0} = await sb.from('v2_product').select('catalog_date').order('catalog_date',{ascending:false}).limit(1);
-  if(e0){ $('area').innerHTML = '<div class="empty">読み込みエラー：'+esc(e0.message)+'</div>'; return; }
-  if(!latest||!latest.length){ $('area').innerHTML='<div class="empty">まだ商品がありません。<br>Mac側で product_fetch.py を1回走らせると、ここに候補が並びます。</div>'; return; }
+  if(e0){ $('area').innerHTML = emptyBox('読み込みエラー：'+esc(e0.message)); return; }
+  if(!latest||!latest.length){ $('area').innerHTML=emptyBox('まだ商品がありません。Mac側で product_fetch.py を1回走らせると、ここに候補が並びます。','📦'); return; }
   CATDATE = latest[0].catalog_date;
   $('dateLbl').innerHTML = `カタログ <b>${esc(CATDATE)}</b>`;
   const {data,error} = await sb.from('v2_product').select('*')
     .eq('catalog_date',CATDATE).order('theme').order('angle_title').order('rank');
-  if(error){ $('area').innerHTML='<div class="empty">読み込みエラー：'+esc(error.message)+'</div>'; return; }
+  if(error){ $('area').innerHTML=emptyBox('読み込みエラー：'+esc(error.message)); return; }
   ROWS = data||[];
   PRODMAP = {}; ROWS.forEach(r=> PRODMAP[pk(r.theme,r.angle_title,r.asin)] = r);
   SEL.clear();
@@ -238,21 +279,24 @@ async function loadPicks(){
   (data||[]).forEach(p=> PICKS[pk(p.theme,p.angle_title,p.asin)] = p);
 }
 
-/* ---------- 共通パーツ ---------- */
+function emptyBox(msg,icon){ return `<div class="empty">${icon?`<div class="ei">${icon}</div>`:''}${msg}</div>`; }
 function verdictBadge(v){
   if(v==='採用') return '<span class="badge adopt">採用</span>';
   if(v==='要確認') return '<span class="badge check">要確認</span>';
   return '<span class="badge hold">保留</span>';
 }
-function badges(o){
-  const src = o.consensus ? `<span class="badge src">${o.consensus}源一致${o.sources?'('+esc(o.sources)+')':''}</span>` : '';
-  const ai  = (o.ai_score!=null) ? `<span class="badge ai">AI適合 ${o.ai_score}</span>` : '';
-  const rev = (o.review_count!=null) ? `<span class="badge rev">レビュー ${Number(o.review_count).toLocaleString()}</span>` : '';
-  return `${verdictBadge(o.verdict)} ${src} ${ai} ${rev}`;
+function srcChips(sources){
+  if(!sources||!sources.length) return '';
+  return '<span class="srcs">'+sources.map(s=>`<span class="schip">${esc(SRC_LABEL[s]||s)}</span>`).join('')+'</span>';
 }
-function thumb(u){ return `<div class="thumb">${u?`<img src="${esc(u)}" loading="lazy" alt="">`:''}</div>`; }
+function aiBlock(score,reason){
+  if(score==null) return reason?`<div class="aireason">${esc(reason)}</div>`:'';
+  const col = score>=80?'var(--green)':score>=55?'var(--blue)':score>=35?'var(--amber)':'var(--faint)';
+  return `<div class="aiwrap"><div class="aibar"><div class="aifill" style="width:${Math.max(4,Math.min(100,score))}%;background:${col}"></div></div><span class="aiscore" style="color:${col}">AI適合 ${score}</span></div>${reason?`<div class="aireason">${esc(reason)}</div>`:''}`;
+}
+function thumb(u){ return `<div class="thumb">${u?`<img src="${esc(u)}" loading="lazy" alt="">`:'▦'}</div>`; }
 
-/* ---------- 候補ビュー（選ぶ→申請） ---------- */
+/* ---------- 候補ビュー ---------- */
 function card(r){
   const key = pk(r.theme,r.angle_title,r.asin);
   ROWMAP[key] = r;
@@ -261,12 +305,11 @@ function card(r){
   const status = pick ? pick.status : null;
   const selectable = !pick || status==='差し戻し';
   const on = SEL.has(key);
-  const reason = r.ai_reason ? `<div class="aireason"><span class="rz">AI</span><span>${esc(r.ai_reason)}</span></div>` : '';
   let corner='';
-  if(status==='申請') corner = `<span class="pcorner applied">申請中・${esc(pick.submitted_name||'')}</span>`;
-  else if(status==='承認') corner = `<span class="pcorner approved">✓ 承認済</span>`;
+  if(status==='申請') corner = `<span class="pcorner applied">申請中</span>`;
+  else if(status==='承認') corner = `<span class="pcorner approved">✓ 承認</span>`;
   else if(selectable) corner = `<div class="selcorner ${on?'on':''}">✓</div>`;
-  let ptop = `<span class="rank">#${r.rank??'-'}</span>`;
+  let ptop = `<span class="rank">#${r.rank??'-'}</span>${verdictBadge(r.verdict)}${r.consensus?srcChips(r.sources):''}`;
   if(status==='差し戻し') ptop += `<span class="pst rejected">差し戻し</span>`;
   const cls = 'pcard'+(selectable?' selectable':'')+(status==='承認'?' approved':'')+((on||status==='申請')?' picked':'');
   return `<div class="${cls}" data-k="${key}">
@@ -274,8 +317,8 @@ function card(r){
     <div class="body">
       <div class="ptop">${ptop}</div>
       <a class="ptitle" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.title||'(無題)')}</a>
-      <div class="meta"><span class="price">${yen(r.price)}</span>${r.brand?`<span class="brand">${esc(r.brand)}</span>`:''} ${badges(r)}</div>
-      ${reason}
+      <div><span class="price">${yen(r.price)}</span>${r.brand?`<span class="brand">${esc(r.brand)}</span>`:''}${r.review_count!=null?`<span class="rev">レビュー ${Number(r.review_count).toLocaleString()}</span>`:''}</div>
+      ${aiBlock(r.ai_score,r.ai_reason)}
       <div class="fbrow">
         <button class="vbtn up ${pv.mine===1?'on':''}" data-a="${esc(r.asin)}" data-t="${esc(r.theme)}" data-g="${esc(r.angle_title||'')}" data-v="1">👍 <span class="vn">${pv.up||''}</span></button>
         <button class="vbtn down ${pv.mine===-1?'on':''}" data-a="${esc(r.asin)}" data-t="${esc(r.theme)}" data-g="${esc(r.angle_title||'')}" data-v="-1">👎 <span class="vn">${pv.down||''}</span></button>
@@ -284,32 +327,47 @@ function card(r){
     ${corner}
   </div>`;
 }
+function selectableKeys(items){
+  return items.filter(r=>{ const p=PICKS[pk(r.theme,r.angle_title,r.asin)]; return !p || p.status==='差し戻し'; })
+              .map(r=>pk(r.theme,r.angle_title,r.asin));
+}
 function renderPool(){
   const byTheme = {};
-  ROWS.forEach(r=>{ const th=r.theme, ag=r.angle_title||''; (byTheme[th]=byTheme[th]||{}); (byTheme[th][ag]=byTheme[th][ag]||[]).push(r); });
+  ROWS.forEach(r=>{
+    if(ADOPT_ONLY && r.verdict!=='採用') return;
+    const th=r.theme, ag=r.angle_title||''; (byTheme[th]=byTheme[th]||{}); (byTheme[th][ag]=byTheme[th][ag]||[]).push(r);
+  });
+  const themes = Object.keys(byTheme);
+  if(!themes.length){ $('area').innerHTML=emptyBox(ADOPT_ONLY?'「採用」の商品がありません。フィルタを外してください。':'この日の商品がありません。','🔍'); return; }
   let html='';
-  Object.keys(byTheme).forEach((th,ti)=>{
+  themes.forEach((th,ti)=>{
     const angles = Object.keys(byTheme[th]);
-    html += `<div class="theme-sec" style="animation-delay:${ti*40}ms"><div class="theme-head">📦 ${esc(th)} <span class="thn">切り口 ${angles.length}</span></div>`;
+    html += `<div class="theme-sec" style="animation-delay:${ti*35}ms"><div class="theme-head"><span class="ic">📦</span>${esc(th)} <span class="thn">切り口 ${angles.length}</span></div>`;
     angles.forEach(ag=>{
       const items = byTheme[th][ag];
-      html += `<div class="angle-sec"><div class="angle-head"><span class="pip"></span>${esc(ag||'(テーマ単位)')}<span class="cnt">${items.length}件</span></div>
+      const selk = selectableKeys(items);
+      const allSel = selk.length>0 && selk.every(k=>SEL.has(k));
+      const bulk = selk.length? `<button class="bulk ${allSel?'clear':''}" data-keys="${esc(selk.join('|'))}">${allSel?'選択を解除':'この切り口を全部選ぶ'}</button>`:'';
+      html += `<div class="angle-sec"><div class="angle-head"><span class="pip"></span><span class="at">${esc(ag||'(テーマ単位)')}</span><span class="cnt">${items.length}件</span>${bulk}</div>
         <div class="pgrid">${items.map(card).join('')}</div></div>`;
     });
     html += `</div>`;
   });
-  $('area').innerHTML = html || '<div class="empty">この日の商品がありません。</div>';
+  $('area').innerHTML = html;
   document.querySelectorAll('.pcard.selectable').forEach(el=>{
     el.onclick=(e)=>{ if(e.target.closest('a,button')) return; const k=el.dataset.k; if(SEL.has(k))SEL.delete(k); else SEL.add(k); render(); };
   });
   document.querySelectorAll('.vbtn').forEach(b=> b.onclick=()=> vote(b.dataset.t,b.dataset.g,b.dataset.a,Number(b.dataset.v)));
+  document.querySelectorAll('.bulk').forEach(b=> b.onclick=()=>{
+    const keys=b.dataset.keys.split('|'); const allSel=keys.every(k=>SEL.has(k));
+    keys.forEach(k=> allSel?SEL.delete(k):SEL.add(k)); render();
+  });
 }
 
-/* ---------- 承認待ち / 承認済みビュー ---------- */
+/* ---------- 承認待ち / 承認済み ---------- */
 function pickRow(p){
   const key = pk(p.theme,p.angle_title,p.asin);
   const prod = PRODMAP[key] || {};
-  const reason = prod.ai_reason ? `<div class="aireason"><span class="rz">AI</span><span>${esc(prod.ai_reason)}</span></div>` : '';
   const approved = p.status==='承認';
   let ops='';
   if(p.status==='申請' && isAdmin())
@@ -318,17 +376,18 @@ function pickRow(p){
     ops += `<button class="dbtn ng" data-k="${key}" data-s="差し戻し">承認を取消</button>`;
   if(p.status!=='承認' && (p.submitted_by===ME.email || isAdmin()))
     ops += `<button class="dbtn wd" data-k="${key}">申請取消</button>`;
-  const whoLine = approved
-    ? `<div class="who"><span class="ini">${esc(ini(p.submitted_name))}</span>申請 ${esc(p.submitted_name||'')} <span class="dt">${fmtDate(p.submitted_at)}</span> → 承認 ${esc(p.decided_name||'')} <span class="dt">${fmtDate(p.decided_at)}</span></div>`
-    : `<div class="who"><span class="ini">${esc(ini(p.submitted_name))}</span>申請 ${esc(p.submitted_name||'')} <span class="dt">${fmtDate(p.submitted_at)}</span></div>`;
+  const who = approved
+    ? `<span class="ini">${esc(ini(p.submitted_name))}</span>${esc(p.submitted_name||'')} <span class="dt">${fmtDate(p.submitted_at)}</span> <span class="arw">→ 承認 ${esc(p.decided_name||'')}</span> <span class="dt">${fmtDate(p.decided_at)}</span>`
+    : `<span class="ini">${esc(ini(p.submitted_name))}</span>${esc(p.submitted_name||'')} が申請 <span class="dt">${fmtDate(p.submitted_at)}</span>`;
   return `<div class="pcard${approved?' approved':''}">
     ${thumb(p.image_url)}
     <div class="body">
+      <div class="ptop"><span class="badge ${p.verdict==='採用'?'adopt':p.verdict==='要確認'?'check':'hold'}">${esc(p.verdict||'—')}</span>${p.consensus?srcChips((p.sources||'').split('/').filter(Boolean)):''}</div>
       <a class="ptitle" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer">${esc(p.title||'(無題)')}</a>
-      <div class="meta"><span class="price">${yen(p.price)}</span>${p.brand?`<span class="brand">${esc(p.brand)}</span>`:''} ${badges(p)}</div>
-      ${reason}
-      ${whoLine}
-      <div class="fbrow"><span style="font-size:11px;color:var(--ink-faint)">${esc(p.theme)}／${esc(p.angle_title||'-')}</span><span class="fbright">${ops}</span></div>
+      <div><span class="price">${yen(p.price)}</span>${p.brand?`<span class="brand">${esc(p.brand)}</span>`:''}<span class="rev">${esc(p.theme)}／${esc(p.angle_title||'-')}</span></div>
+      ${aiBlock(prod.ai_score,prod.ai_reason)}
+      <div class="who">${who}</div>
+      <div class="fbrow"><span class="fbright">${ops}</span></div>
     </div>
   </div>`;
 }
@@ -337,14 +396,12 @@ function renderList(status){
     .sort((a,b)=> (b.submitted_at||'').localeCompare(a.submitted_at||''));
   let head='';
   if(status==='承認'){
-    const by={};
-    picks.forEach(p=>{ const n=p.submitted_name||p.submitted_by||'?'; by[n]=(by[n]||0)+1; });
-    const chips = Object.keys(by).sort((a,b)=>by[b]-by[a])
-      .map(n=>`<span class="pchip"><span class="ini">${esc(ini(n))}</span>${esc(n)} <b>${by[n]}</b></span>`).join('');
-    if(chips) head = `<div class="summary"><div class="sh">担当者別 承認済み件数（＝作るクリエイティブ数の目安）</div><div class="chips">${chips}</div></div>`;
+    const by={}; picks.forEach(p=>{ const n=p.submitted_name||p.submitted_by||'?'; by[n]=(by[n]||0)+1; });
+    const chips = Object.keys(by).sort((a,b)=>by[b]-by[a]).map(n=>`<span class="pchip"><span class="ini">${esc(ini(n))}</span>${esc(n)} <b>${by[n]}</b></span>`).join('');
+    if(chips) head = `<div class="summary"><div class="sh">👤 担当者別 承認件数（＝作るクリエイティブ数の目安）</div><div class="chips">${chips}</div></div>`;
   }
   if(!picks.length){
-    $('area').innerHTML = head + `<div class="empty">${status==='申請'?'承認待ちの申請はありません。':'承認済みはまだありません。'}</div>`;
+    $('area').innerHTML = head + emptyBox(status==='申請'?'承認待ちの申請はありません。':'承認済みはまだありません。', status==='申請'?'📨':'✅');
     return;
   }
   $('area').innerHTML = head + `<div class="pgrid">${picks.map(pickRow).join('')}</div>`;
@@ -352,21 +409,28 @@ function renderList(status){
   document.querySelectorAll('.dbtn.wd').forEach(b=> b.onclick=()=> withdraw(b.dataset.k));
 }
 
-/* ---------- ルート描画 ---------- */
 function render(){
   ROWMAP = {};
   const themes = new Set(ROWS.map(r=>r.theme));
   const picks = Object.values(PICKS);
-  const nPending = picks.filter(p=>p.status==='申請').length;
-  const nApproved = picks.filter(p=>p.status==='承認').length;
-  $('cThemes').textContent = themes.size;
-  $('cItems').textContent  = ROWS.length;
-  $('tbPending').textContent = nPending;
-  $('tbApproved').textContent = nApproved;
+  $('tbPending').textContent = picks.filter(p=>p.status==='申請').length;
+  $('tbApproved').textContent = picks.filter(p=>p.status==='承認').length;
   document.querySelectorAll('.tab').forEach(t=> t.classList.toggle('on', t.dataset.v===VIEW));
-  if(VIEW==='pool'){ $('lead').innerHTML='使いたい商品を <b>カードごとクリックして選択</b>（右上の○が✓に）→ 下の「申請する」で送信。管理者は「承認待ち」で承認します。'; renderPool(); }
-  else if(VIEW==='pending'){ $('lead').innerHTML='申請された商品の一覧です。'+(isAdmin()?'<b>「承認する」で確定</b>、合わなければ「差し戻し」。':'管理者の承認待ちです。'); renderList('申請'); }
-  else { $('lead').innerHTML='承認された商品の一覧です。ここに載ったものが実際に使う商品（＝クリエイティブを作る対象）です。'; renderList('承認'); }
+  $('adoptToggle').style.display = VIEW==='pool'?'inline-flex':'none';
+  $('adoptToggle').classList.toggle('on', ADOPT_ONLY);
+  if(VIEW==='pool'){
+    $('viewTitle').textContent='切り口ごとの商品候補';
+    $('lead').innerHTML=`使いたい商品を<b>クリックで選択</b>（右上○→✓）→ 下の「申請する」。テーマ${themes.size}・商品${ROWS.length}`;
+    renderPool();
+  }else if(VIEW==='pending'){
+    $('viewTitle').textContent='承認待ち';
+    $('lead').innerHTML= isAdmin()?'申請された商品です。<b>「承認する」で確定</b>、合わなければ「差し戻し」。':'あなたや他の人が申請した商品です。管理者の承認待ちです。';
+    renderList('申請');
+  }else{
+    $('viewTitle').textContent='承認済み';
+    $('lead').innerHTML='承認された商品＝実際に使う（クリエイティブを作る）対象です。';
+    renderList('承認');
+  }
   updateBar();
 }
 function updateBar(){
@@ -377,12 +441,12 @@ function updateBar(){
 /* ---------- 申請・承認・投票 ---------- */
 async function submitPicks(){
   const rows = [...SEL].map(k=>{
-    const r = ROWMAP[k] || PRODMAP[k];
+    const r = ROWMAP[k] || PRODMAP[k]; if(!r) return null;
     return {catalog_date:CATDATE, theme:r.theme, angle_title:r.angle_title||'', asin:r.asin,
       title:r.title, url:r.url, image_url:r.image_url, price:r.price, brand:r.brand,
       review_count:r.review_count, consensus:r.consensus, sources:r.sources, verdict:r.verdict, ai_score:r.ai_score,
       status:'申請', submitted_by:ME.email, submitted_name:ME.name||ME.email, submitted_at:new Date().toISOString()};
-  });
+  }).filter(Boolean);
   if(!rows.length) return;
   const {error} = await sb.from('v2_product_pick').upsert(rows,{onConflict:'catalog_date,theme,angle_title,asin'});
   if(error){ toast('申請エラー：'+error.message); return; }
@@ -420,6 +484,7 @@ async function vote(theme, angle, asin, v){
 
 document.querySelectorAll('.tab').forEach(t=> t.onclick=()=>{ VIEW=t.dataset.v; render(); });
 $('reloadBtn').onclick = load;
+$('adoptToggle').onclick = ()=>{ ADOPT_ONLY=!ADOPT_ONLY; render(); };
 $('goBtn').onclick = submitPicks;
 $('clrBtn').onclick = ()=>{ SEL.clear(); render(); };
 boot();
