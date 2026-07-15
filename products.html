@@ -257,12 +257,15 @@ function showGate(msg){
 
 async function load(){
   $('area').innerHTML = '<div class="pgrid">'+Array(4).fill('<div class="skel"></div>').join('')+'</div>';
-  const {data:latest,error:e0} = await sb.from('v2_product').select('catalog_date').order('catalog_date',{ascending:false}).limit(1);
+  // 表示日＝「今日のカタログ」。※以前は「商品がある最新日」を見ていたため、
+  //   今日の切り口を開いても古い日付を検索して常に空になっていた（2026-07-14 修正）。
+  const {data:cat,error:e0} = await sb.from('v2_catalog').select('date').order('date',{ascending:false}).limit(1);
   if(e0){ $('area').innerHTML = emptyBox('読み込みエラー：'+esc(e0.message)); return; }
-  if(!latest||!latest.length){ $('area').innerHTML=emptyBox('まだ商品がありません。Mac側で product_fetch.py を1回走らせると、ここに候補が並びます。','📦'); return; }
-  CATDATE = latest[0].catalog_date;
+  if(!cat||!cat.length){ $('area').innerHTML=emptyBox('カタログがまだ生成されていません。','📦'); return; }
+  CATDATE = cat[0].date;
   $('dateLbl').innerHTML = `カタログ <b>${esc(CATDATE)}</b>`;
-  let q = sb.from('v2_product').select('*').eq('catalog_date',CATDATE);
+  // 全テーマ表示のため上限を明示（Supabaseの既定は1000行＝全75テーマ約2300件が入りきらない）。
+  let q = sb.from('v2_product').select('*').eq('catalog_date',CATDATE).limit(5000);
   if(SCOPE){ q = q.eq('theme',SCOPE.theme).eq('angle_title',SCOPE.angle); }
   const {data,error} = await q.order('theme').order('angle_title').order('rank');
   if(error){ $('area').innerHTML=emptyBox('読み込みエラー：'+esc(error.message)); return; }
@@ -274,7 +277,7 @@ async function load(){
 }
 async function loadVotes(){
   PV = {};
-  const {data} = await sb.from('v2_product_vote').select('*').eq('catalog_date',CATDATE);
+  const {data} = await sb.from('v2_product_vote').select('*').eq('catalog_date',CATDATE).limit(5000);
   (data||[]).forEach(v=>{
     const k = pk(v.theme,v.angle_title,v.asin);
     const o = PV[k] || (PV[k]={up:0,down:0,mine:0});
@@ -284,7 +287,7 @@ async function loadVotes(){
 }
 async function loadPicks(){
   PICKS = {};
-  const {data} = await sb.from('v2_product_pick').select('*').eq('catalog_date',CATDATE);
+  const {data} = await sb.from('v2_product_pick').select('*').eq('catalog_date',CATDATE).limit(5000);
   (data||[]).forEach(p=> PICKS[pk(p.theme,p.angle_title,p.asin)] = p);
 }
 
@@ -363,7 +366,7 @@ function bindPool(){
 function renderPool(){
   const rows = ROWS.filter(r=> !(ADOPT_ONLY && r.verdict!=='採用'));
   if(SCOPE){
-    if(!rows.length){ $('area').innerHTML=emptyBox(ADOPT_ONLY?'「採用」の商品がありません。':'この切り口の商品はまだ取得されていません。<br>担当バッチで取得されると、ここに並びます。','📦'); return; }
+    if(!rows.length){ $('area').innerHTML=emptyBox(ADOPT_ONLY?'「採用」の商品がありません。':'この切り口の商品はまだ取得されていません。<br>入口で「<b>対応する</b>」を押すと、<b>30分以内に自動で取得</b>されます。<br><span style="color:var(--soft);font-size:12px">（主要テーマは毎朝7:30に先読み取得済みです）</span>','📦'); return; }
     $('area').innerHTML = `<div class="theme-sec">${angleBlock(rows)}</div>`;
     bindPool(); return;
   }
