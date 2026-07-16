@@ -63,10 +63,6 @@
   .tb.shun{background:var(--teal-soft);color:var(--teal)}.tb.ever{background:var(--purple-soft);color:var(--purple)}
   .tcard .tbot{display:flex;align-items:center;gap:8px;margin-top:8px}
   .tcard .tang{font-size:11px;color:var(--ink-soft);font-weight:600}.tcard .tang b{color:var(--ink)}
-  .pbadge{font-size:9px;font-weight:700;padding:1px 8px;border-radius:100px;margin-left:6px;white-space:nowrap}
-  .pbadge.has{background:var(--green-soft);color:var(--green)}
-  .pbadge.none{background:var(--gray-soft);color:var(--ink-faint)}
-  button.active-filter{background:var(--blue-soft)!important;color:var(--blue-deep)!important;border-color:#cfe0fb!important}
   .tcard .tarrow{margin-left:auto;font-size:11px;color:var(--blue);font-weight:700}
   .tcard .digbtn{font-size:11.5px;font-weight:700;color:var(--blue-deep);background:var(--blue-soft);border:1px solid #cfe0fb;border-radius:8px;padding:5px 13px;display:inline-flex;align-items:center;gap:5px;transition:.15s;cursor:pointer}
   .tcard:hover .digbtn{background:#dfeafd;border-color:#b7d2fa}
@@ -232,7 +228,6 @@
 
   <div class="controls">
     <button class="reload" id="reloadBtn">🔄 最新を再読込</button>
-    <button class="ghost" id="prodOnlyBtn">📦 商品ありだけ</button>
     <button class="ghost hidden" id="adminBtn">👥 メンバー管理</button>
     <span class="counter" id="counter"></span>
   </div>
@@ -267,9 +262,6 @@ let ME = null;          // {email,name,role}
 let CATALOG = null;     // payload
 let CATS = {}, THEMES = [], ANGLE_DATA = {}, ASSIGN = [];
 let CATDATE = null;
-let PRODCOUNT = {};   // "theme::angle" -> 商品件数
-let PRODTHEME = {};   // "theme" -> {total, angles}（商品がある切り口数）
-let prodOnly = false; // 「商品ありだけ」フィルタ
 let CLAIMS = {};        // key -> {user_email,user_name,status}
 let VOTES = {};         // key -> {up,down,mine}
 let LEARNING = [];      // 直近の学習(透明性表示用)
@@ -318,34 +310,13 @@ async function loadCatalog(){
   CATALOG = row.payload; CATDATE = row.date;
   CATS = CATALOG.CATS || {}; THEMES = CATALOG.THEMES || []; ANGLE_DATA = CATALOG.ANGLE_DATA || {}; ASSIGN = CATALOG.ASSIGN || [];
   $('dateLbl').innerHTML = `今日のカタログ <b>${row.date}</b>`;
-  await loadClaims(); await loadVotes(); await loadLearning(); await loadProductCounts();
+  await loadClaims(); await loadVotes(); await loadLearning();
   renderStats(); renderLearning(); renderFilter(); renderThemes();
 }
 async function loadClaims(){
   CLAIMS = {};
   const {data} = await sb.from('v2_claim').select('*').eq('catalog_date', CATDATE);
   (data||[]).forEach(c=>{ CLAIMS[claimKey(c.kind,c.theme,c.angle_title)] = c; });
-}
-// 今日の商品件数を切り口/テーマ単位で集計（入口のバッジ用）
-async function loadProductCounts(){
-  PRODCOUNT = {}; PRODTHEME = {};
-  const {data,error} = await sb.from('v2_product').select('theme,angle_title').eq('catalog_date',CATDATE).limit(20000);
-  if(error){ return; }
-  (data||[]).forEach(r=>{
-    const k = r.theme+'::'+(r.angle_title||'');
-    PRODCOUNT[k] = (PRODCOUNT[k]||0)+1;
-    const th = PRODTHEME[r.theme] || (PRODTHEME[r.theme]={total:0,angles:new Set()});
-    th.total++; th.angles.add(r.angle_title||'');
-  });
-}
-function themeBadge(theme){
-  const info = PRODTHEME[theme];
-  if(!info || !info.total) return '<span class="pbadge none">商品 未取得</span>';
-  return `<span class="pbadge has">商品 ${info.total}件 / ${info.angles.size}切り口</span>`;
-}
-function angleBadge(theme,angle){
-  const n = PRODCOUNT[theme+'::'+(angle||'')]||0;
-  return n>0 ? `<span class="pbadge has">商品 ${n}件</span>` : '<span class="pbadge none">未取得</span>';
 }
 function claimKey(kind,theme,angle){ return kind+'::'+theme+'::'+(angle||''); }
 
@@ -459,8 +430,7 @@ function renderThemes(){
   const cats = Object.keys(CATS);
   const showCats = filter==='all'? cats : [filter];
   showCats.forEach((cat,idx)=>{
-    let themes = THEMES.filter(t=>t.cat===cat).sort((a,b)=>b.score-a.score);
-    if(prodOnly) themes = themes.filter(t=> PRODTHEME[t.t] && PRODTHEME[t.t].total>0);
+    const themes = THEMES.filter(t=>t.cat===cat).sort((a,b)=>b.score-a.score);
     if(!themes.length) return;
     const sec = document.createElement('div'); sec.className='cat-section'; sec.style.animationDelay=(idx*.04)+'s';
     const totAng = themes.reduce((n,t)=>n+t.ang,0);
@@ -469,7 +439,7 @@ function renderThemes(){
     themes.forEach((t,i)=>{
       const card = document.createElement('div'); card.className='tcard'+(t.pin?' pin':''); card.style.animationDelay=(i*.02)+'s';
       card.innerHTML = `<div class="tt">${t.t}<span class="tb ${t.o}">${t.o==='shun'?'旬':'常時'}</span>${t.gt?'<span class="gtb">📈トレンド</span>':''}${t.pin?'<span class="pinb">★</span>':''}</div>
-        <div class="tbot"><span class="tang">切り口 <b>${t.ang}</b></span>${themeBadge(t.t)}</div>
+        <div class="tbot"><span class="tang">切り口 <b>${t.ang}</b></span></div>
         <div class="treason"><span class="rz">理由</span><span>${t.memo}</span></div>
         <div class="fbrow"></div>`;
       renderFbRow(card.querySelector('.fbrow'), 'theme', t.t, null, true);
@@ -596,7 +566,7 @@ async function openAngles(theme,card,grid){
   fb.innerHTML=`<h3><span class="ck">✓</span>「${theme.t}」→ ${finalAngles.length} 件の切り口</h3><div class="fb-sub">各切り口を「対応する」と、誰が担当か共有されます。</div>`;
   finalAngles.forEach(a=>{
     const el=document.createElement('div'); el.className='finalangle';
-    el.innerHTML=`<div class="fa-t">${a.t}<span class="src ${a.src}">${a.src==='data'?'データ裏付け':'判定で救済'}</span>${angleBadge(theme.t,a.t)}</div><div class="fa-r">${a.note}</div><div class="claimrow" data-kind="angle" data-theme="${theme.t.replace(/"/g,'&quot;')}" data-angle="${a.t.replace(/"/g,'&quot;')}"></div><div class="fbrow"></div>`;
+    el.innerHTML=`<div class="fa-t">${a.t}<span class="src ${a.src}">${a.src==='data'?'データ裏付け':'判定で救済'}</span></div><div class="fa-r">${a.note}</div><div class="claimrow" data-kind="angle" data-theme="${theme.t.replace(/"/g,'&quot;')}" data-angle="${a.t.replace(/"/g,'&quot;')}"></div><div class="fbrow"></div>`;
     fb.appendChild(el);
     renderClaimRow(el.querySelector('.claimrow'),'angle',theme.t,a.t);
     renderFbRow(el.querySelector('.fbrow'),'angle',theme.t,a.t);
@@ -633,7 +603,6 @@ async function renderMembers(){
 }
 
 $('reloadBtn').onclick = ()=> loadCatalog();
-$('prodOnlyBtn').onclick = ()=>{ prodOnly=!prodOnly; $('prodOnlyBtn').classList.toggle('active-filter', prodOnly); $('prodOnlyBtn').textContent = prodOnly ? '📦 商品ありだけ ✓' : '📦 商品ありだけ'; renderThemes(); };
 boot();
 </script>
 </body>
