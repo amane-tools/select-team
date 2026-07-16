@@ -265,6 +265,7 @@ let CATDATE = null;
 let CLAIMS = {};        // key -> {user_email,user_name,status}
 let VOTES = {};         // key -> {up,down,mine}
 let LEARNING = [];      // 直近の学習(透明性表示用)
+let PRODCOUNT = {};     // "theme::angle" -> 商品数（0件切り口を隠すため）
 let filter = 'all', panelBusy = false;
 const CTL = {nayami:"悩み",scene:"シーン",buy:"購買軸",attr:"属性"};
 
@@ -310,7 +311,7 @@ async function loadCatalog(){
   CATALOG = row.payload; CATDATE = row.date;
   CATS = CATALOG.CATS || {}; THEMES = CATALOG.THEMES || []; ANGLE_DATA = CATALOG.ANGLE_DATA || {}; ASSIGN = CATALOG.ASSIGN || [];
   $('dateLbl').innerHTML = `今日のカタログ <b>${row.date}</b>`;
-  await loadClaims(); await loadVotes(); await loadLearning();
+  await loadClaims(); await loadVotes(); await loadLearning(); await loadProductCounts();
   renderStats(); renderLearning(); renderFilter(); renderThemes();
 }
 async function loadClaims(){
@@ -319,6 +320,15 @@ async function loadClaims(){
   (data||[]).forEach(c=>{ CLAIMS[claimKey(c.kind,c.theme,c.angle_title)] = c; });
 }
 function claimKey(kind,theme,angle){ return kind+'::'+theme+'::'+(angle||''); }
+
+/* ---------- 商品数（0件の切り口を隠すため） ---------- */
+async function loadProductCounts(){
+  PRODCOUNT = {};
+  const {data,error} = await sb.from('v2_product').select('theme,angle_title').eq('catalog_date',CATDATE).limit(20000);
+  if(error){ return; }
+  (data||[]).forEach(r=>{ const k=r.theme+'::'+(r.angle_title||''); PRODCOUNT[k]=(PRODCOUNT[k]||0)+1; });
+}
+function angleHasProducts(theme,angle){ return (PRODCOUNT[theme+'::'+(angle||'')]||0) > 0; }
 
 /* ---------- フィードバック(👍👎/コメント) ---------- */
 async function loadVotes(){
@@ -561,8 +571,14 @@ async function openAngles(theme,card,grid){
   // 最終（＋切り口ごとの担当ボタン）
   const backed=data.angles.filter(a=>a.st==='backed');
   const saved=grays.filter(g=>g.verdict==='save');
-  const finalAngles=[...backed.map(b=>({t:b.t,src:'data',note:b.line})),...saved.map(s=>({t:s.t,src:'saved',note:s.vreason}))];
+  let finalAngles=[...backed.map(b=>({t:b.t,src:'data',note:b.line})),...saved.map(s=>({t:s.t,src:'saved',note:s.vreason}))];
+  // 商品が0件の切り口は出さない（空ページを見せない自動キュレーション）
+  finalAngles=finalAngles.filter(a=>angleHasProducts(theme.t,a.t));
   const fb=document.createElement('div'); fb.className='finalbox';
+  if(finalAngles.length===0){
+    fb.innerHTML=`<h3><span class="ck">✓</span>「${theme.t}」</h3><div class="fb-sub">このテーマの商品はただいま準備中です（毎朝の先読みで取得されます）。</div>`;
+    body.appendChild(fb); panelBusy=false; return;
+  }
   fb.innerHTML=`<h3><span class="ck">✓</span>「${theme.t}」→ ${finalAngles.length} 件の切り口</h3><div class="fb-sub">各切り口を「対応する」と、誰が担当か共有されます。</div>`;
   finalAngles.forEach(a=>{
     const el=document.createElement('div'); el.className='finalangle';
