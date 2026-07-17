@@ -90,6 +90,8 @@
   .price{font-size:16px;font-weight:800;letter-spacing:-.01em}
   .brand{font-size:11.5px;color:var(--soft);font-weight:600;margin-left:7px}
   .rev{font-size:10.5px;color:var(--faint);margin-left:7px}
+  .pfeat{margin:7px 0 0;padding-left:15px;font-size:11px;color:var(--soft);line-height:1.55}
+  .pfeat li{list-style:disc;margin-bottom:2px}
   .aiwrap{display:flex;align-items:center;gap:8px;margin-top:8px}
   .aibar{flex:1;height:6px;border-radius:100px;background:#edf0f6;overflow:hidden;max-width:150px}
   .aifill{height:100%;border-radius:100px}
@@ -264,8 +266,7 @@ async function load(){
   if(!cat||!cat.length){ $('area').innerHTML=emptyBox('カタログがまだ生成されていません。','📦'); return; }
   CATDATE = cat[0].date;
   $('dateLbl').innerHTML = `カタログ <b>${esc(CATDATE)}</b>`;
-  // 全テーマ表示のため上限を明示（Supabaseの既定は1000行＝全75テーマ約2300件が入りきらない）。
-  let q = sb.from('v2_product').select('*').eq('catalog_date',CATDATE).limit(5000);
+  let q = sb.from('v2_product').select('*').eq('catalog_date',CATDATE);
   if(SCOPE){ q = q.eq('theme',SCOPE.theme).eq('angle_title',SCOPE.angle); }
   const {data,error} = await q.order('theme').order('angle_title').order('rank');
   if(error){ $('area').innerHTML=emptyBox('読み込みエラー：'+esc(error.message)); return; }
@@ -277,7 +278,7 @@ async function load(){
 }
 async function loadVotes(){
   PV = {};
-  const {data} = await sb.from('v2_product_vote').select('*').eq('catalog_date',CATDATE).limit(5000);
+  const {data} = await sb.from('v2_product_vote').select('*').eq('catalog_date',CATDATE);
   (data||[]).forEach(v=>{
     const k = pk(v.theme,v.angle_title,v.asin);
     const o = PV[k] || (PV[k]={up:0,down:0,mine:0});
@@ -287,7 +288,7 @@ async function loadVotes(){
 }
 async function loadPicks(){
   PICKS = {};
-  const {data} = await sb.from('v2_product_pick').select('*').eq('catalog_date',CATDATE).limit(5000);
+  const {data} = await sb.from('v2_product_pick').select('*').eq('catalog_date',CATDATE);
   (data||[]).forEach(p=> PICKS[pk(p.theme,p.angle_title,p.asin)] = p);
 }
 
@@ -309,6 +310,11 @@ function aiBlock(score,reason){
   return `<div class="aiwrap"><div class="aibar"><div class="aifill" style="width:${Math.max(4,Math.min(100,score))}%;background:${col}"></div></div><span class="aiscore" style="color:${col}">AI適合 ${score}</span></div>${reason?`<div class="aireason">${esc(reason)}</div>`:''}`;
 }
 function thumb(u){ return `<div class="thumb">${u?`<img src="${esc(u)}" loading="lazy" alt="">`:'▦'}</div>`; }
+function featBlock(feats){
+  if(!Array.isArray(feats) || !feats.length) return '';
+  const items = feats.slice(0,3).map(f=>`<li>${esc(String(f))}</li>`).join('');
+  return `<ul class="pfeat">${items}</ul>`;
+}
 
 /* ---------- 候補ビュー ---------- */
 function card(r){
@@ -332,6 +338,7 @@ function card(r){
       <div class="ptop">${ptop}</div>
       <a class="ptitle" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.title||'(無題)')}</a>
       <div><span class="price">${yen(r.price)}</span>${r.brand?`<span class="brand">${esc(r.brand)}</span>`:''}${r.review_count!=null?`<span class="rev">レビュー ${Number(r.review_count).toLocaleString()}</span>`:''}</div>
+      ${featBlock(r.features)}
       ${aiBlock(r.ai_score,r.ai_reason)}
       <div class="fbrow">
         <button class="vbtn up ${pv.mine===1?'on':''}" data-a="${esc(r.asin)}" data-t="${esc(r.theme)}" data-g="${esc(r.angle_title||'')}" data-v="1">👍 <span class="vn">${pv.up||''}</span></button>
@@ -408,6 +415,7 @@ function pickRow(p){
       <div class="ptop"><span class="badge ${p.verdict==='採用'?'adopt':p.verdict==='要確認'?'check':'hold'}">${esc(p.verdict||'—')}</span>${p.consensus?srcChips((p.sources||'').split('/').filter(Boolean)):''}</div>
       <a class="ptitle" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer">${esc(p.title||'(無題)')}</a>
       <div><span class="price">${yen(p.price)}</span>${p.brand?`<span class="brand">${esc(p.brand)}</span>`:''}<span class="rev">${esc(p.theme)}／${esc(p.angle_title||'-')}</span></div>
+      ${featBlock(prod.features)}
       ${aiBlock(prod.ai_score,prod.ai_reason)}
       <div class="who">${who}</div>
       <div class="fbrow"><span class="fbright">${ops}</span></div>
