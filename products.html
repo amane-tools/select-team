@@ -312,8 +312,13 @@ function aiBlock(score,reason){
 function thumb(u){ return `<div class="thumb">${u?`<img src="${esc(u)}" loading="lazy" alt="">`:'▦'}</div>`; }
 function featBlock(feats){
   if(!Array.isArray(feats) || !feats.length) return '';
-  const items = feats.slice(0,3).map(f=>`<li>${esc(String(f))}</li>`).join('');
-  return `<ul class="pfeat">${items}</ul>`;
+  // Amazonの特徴は長文のことがあるので、1行を短く切り詰めて最大3行だけ簡潔に表示。
+  const items = feats.slice(0,3).map(f=>{
+    let s = String(f).replace(/\s+/g,' ').trim();
+    if(s.length > 46) s = s.slice(0,46) + '…';
+    return s;
+  }).filter(Boolean).map(s=>`<li>${esc(s)}</li>`).join('');
+  return items ? `<ul class="pfeat">${items}</ul>` : '';
 }
 
 /* ---------- 候補ビュー ---------- */
