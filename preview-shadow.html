@@ -12,7 +12,7 @@
 <body>
 <div class="shell">
 <div class="top"><div class="brand"><span class="logo">S.</span>商品セレクト</div><div class="meta">確認用プレビュー<br>Actions #154・2026-07-24</div></div>
-<div class="notice"><strong>影テスト結果の確認画面</strong>　このページの商品はDBに保存されていません。<small>AI適合度・候補数・保留理由を、本番に近いカード表示で確認するためのプレビューです。</small></div>
+<div class="notice"><strong>影テスト結果の確認画面</strong>　このページの商品はDBに保存されていません。<small>Actions #154の候補数・AIスコアと、確認済みの商品情報を使った本番前プレビューです。</small></div>
 <div class="layout"><aside class="panel"><h2>今回テストした切り口</h2><div id="angles"></div></aside><main class="main"><div class="mainhead"><div><div class="eyebrow" id="kind"></div><h1 id="title"></h1><div class="kw" id="kw"></div></div><div class="summary"><b id="count"></b><span id="status"></span></div></div><div class="grid" id="products"></div><div class="foot">判定の考え方：AIスコアを主軸にし、最低点が80点未満・候補5件未満の切り口は正式反映を保留。9件を埋めるための低評価商品は追加しません。<br>※Amazonの星評価・評価件数は今回の影テストではAPIから取得できないため表示していません。</div></main></div>
 </div>
 <script>
@@ -24,7 +24,7 @@ const A=[
 ['B0FW4K2J5F','マーナ(Marna)','すき間や溝が洗いやすいバスブラシ','90','すき間・溝・浴室用途が具体的','🧹'],['B0DJFR1366','TOFFY','マグネット隙間ブラシ 浴槽・タイル・すき間','90','浴槽・タイルのすき間掃除に一致','🧽'],['B0BJCJGWPK','アズマ工業','スマート 浴室スミズミブラシ マグネット収納','90','排水溝・ドアレール・タイル目地に対応','🧹'],['B0CWYSTFB8','spoil','すきま爽快 掃除 溝ブラシ（2本セット）','85','家中のすき間掃除。風呂にも利用可能','🧽'],['B0CQNK583V','激落ちくん','すき間・レールブラシ 浴室用','85','浴室・レールのすき間向け','🧹'],['B0968C2HV4','スリーエム(3M)','お風呂掃除ブラシ コンパクト 抗菌','75','浴室用だが、すき間特化が弱く保留','⚠️']
 ]},
 {id:'pillow',kind:'通常',title:'買い替え向けの枕（高さで選ぶ）',theme:'枕',kw:'枕 高さ',status:'正式反映保留（3件・5件未満）',products:[
-['B0GVH7BR15','RecreLife+','あなたの高さが見つかる枕 高さ調整14通り','100','高さ調整14通りで買い替えの高さ軸に一致','🛏️'],['B0G3WRXS78','GOKUMIN','低反発枕 高さ調整 横向き寝対応','95','高さ調整と横向き対応が具体的','🛏️'],['B09LTRSJN3','Reowide','高反発シート 高さ調整シート 枕','85','後から高さ調整できるが候補数不足','🛏️']
+['B0GVH7BR15','RecreLife+','あなたの高さが見つかる枕 高さ調整14通り','95','高さ調整14通りで買い替えの高さ軸に一致','🛏️'],['B0G3WRXS78','GOKUMIN','低反発枕 高さ調整 横向き寝対応','85','高さ調整と横向き対応が具体的','🛏️'],['B09LTRSJN3','Reowide','高反発シート 高さ調整シート 枕','85','後から高さ調整できるが候補数不足','🛏️']
 ]}
 ];
 let current=A[0];const angles=document.querySelector('#angles'),products=document.querySelector('#products');
